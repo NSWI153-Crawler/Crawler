@@ -3,25 +3,25 @@
 
 ## TODO List
 
-Frontend
+**Frontend**
 - [ ] records: pages, filter, sort
 - [ ] list executions (for all records, for single record)
 - [ ] Crawler visualization
 - [ ] design, css
 
-Backend
+**Backend**
 - [ ] Routing, Serving
 - [ ] Crawler execution management (multi thread)
 - [ ] OpenAPI/Swagger
 
-Database
+**Database**
 - [ ] Create database (Graph QL)
 
-Deployment
+**Deployment**
 - [ ] Linter, Prettier
 - [ ] .env
 - [ ] Dockerfiles
 - [ ] Docker Compose
 
-Other
+**Other**
 - [ ] Tests?
