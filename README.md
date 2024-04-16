@@ -4,10 +4,10 @@
 ## TODO List
 
 **Frontend**
-- [ ] records: pages, filter, sort
-- [ ] list executions (for all records, for single record)
+- [ ] Website records list: pages, filter, sort
+- [ ] Executions list (for all records / for single record)
 - [ ] Crawler visualization
-- [ ] design, css
+- [ ] Design, css
 
 **Backend**
 - [ ] Routing, Serving
