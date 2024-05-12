@@ -1,13 +1,13 @@
 <template>
-  <div class="w-1/2 min-w-[500px] rounded-lg overflow-hidden relative mx-auto mb-4">
-    <div class="flex space-x-1 pl-4 justify-end float-left">
-      <div class="flex border border-black rounded-lg overflow-hidden">
+  <div class="w-1/2 min-w-[500px] mx-auto mb-4">
+    <div class="pl-4 float-left">
+      <div class="toggle-container">
         <label
           :class="[
             view_toggle === view_domain
-              ? 'highlighted-static bg-yellow-400 text-black'
-              : 'not-highlighted bg-gray-700 text-gray-400 border-gray-600',
-            'px-4 py-1 select-none cursor-pointer transition-colors duration-300',
+              ? 'bg-yellow-400 text-black'
+              : 'disabled-state',
+            'button-style',
           ]"
           @click="view_toggle = view_domain"
         >
@@ -16,9 +16,9 @@
         <label
           :class="[
             view_toggle === view_website
-              ? 'highlighted-live bg-blue-600 text-white'
-              : 'not-highlighted bg-gray-700 text-gray-400 border-gray-600',
-            'px-4 py-1 select-none cursor-pointer transition-colors duration-300',
+              ? 'bg-blue-600 text-white'
+              : 'disabled-state',
+            'button-style',
           ]"
           @click="view_toggle = view_website"
         >
@@ -29,13 +29,13 @@
 
     <div class="flex space-x-1 pr-4 justify-end">
       <div class="p-1 select-none cursor-default">Mode:</div>
-      <div class="flex border border-black rounded-lg overflow-hidden">
+      <div class="toggle-container">
         <label
           :class="[
             mode_toggle === mode_static
-              ? 'highlighted-static bg-orange-500 text-black'
-              : 'not-highlighted bg-gray-700 text-gray-400 border-gray-600',
-            'px-4 py-1 select-none cursor-pointer transition-colors duration-300',
+              ? 'bg-orange-500 text-black'
+              : 'disabled-state',
+            'button-style',
           ]"
           @click="mode_toggle = mode_static"
         >
@@ -44,9 +44,9 @@
         <label
           :class="[
             mode_toggle === mode_live
-              ? 'highlighted-live bg-green-500 text-black'
-              : 'not-highlighted bg-gray-700 text-gray-400 border-gray-600',
-            'px-4 py-1 select-none cursor-pointer transition-colors duration-300',
+              ? 'bg-green-500 text-black'
+              : 'disabled-state',
+            'button-style',
           ]"
           @click="mode_toggle = mode_live"
         >
@@ -56,12 +56,13 @@
     </div>
   </div>
 
-  <div class="w-1/2 min-w-[500px] border border-black rounded-lg overflow-hidden relative mx-auto h-[60vh]">
+  <div class="w-1/2 min-w-[500px] border border-black rounded-lg overflow-hidden relative mx-auto h-[600px]">
     <v-network-graph class="z-10"
                      :nodes="nodes"
                      :edges="edges"
                      :layouts="layouts"
                      :configs="configs"
+                     :eventHandlers="eventHandlers"
     >
       <!-- To use CSS within SVG, <defs> is used -->
       <defs>
@@ -137,6 +138,17 @@ const configs = reactive(
   },
 })
 )
+
+const eventHandlers: vNG.EventHandlers = {
+  "node:dblclick": ({ node }) => {
+    if (true){ //node.crawled) {
+      console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
+    }
+    else {
+      console.log("open node detail: URL");
+    }
+  },
+}
 
 /**
  * Make `transform` value of the object placing on the edge.
