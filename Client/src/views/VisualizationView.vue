@@ -1,4 +1,5 @@
 <template>
+  <h1 class="text-3xl font-bold text-center">{{ record.label }}</h1>
   <div class="w-1/2 min-w-[500px] mx-auto mb-4">
     <div class="pl-4 float-left">
       <div class="toggle-container">
@@ -93,7 +94,21 @@
 
 <script setup lang="ts">
 import * as vNG from "v-network-graph"
-import { reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref } from "vue"
+import { useWebsiteRecordStore } from '../stores/records'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const store = useWebsiteRecordStore()
+let id = ""
+onMounted(() => {
+  id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
+})
+// const record = computed(() => store.getRecordById(id)) TODO
+const record = {
+   label: "example.com",
+}
+
 
 const nodes = {
   node1: { name: "example.com", color: "white" },
@@ -141,7 +156,7 @@ const configs = reactive(
 
 const eventHandlers: vNG.EventHandlers = {
   "node:dblclick": ({ node }) => {
-    if (true){ //node.crawled) {
+    if (true){ //node.crawled) { TODO
       console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
     }
     else {

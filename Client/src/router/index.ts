@@ -12,8 +12,7 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/visualization',
-      name: 'visualization',
+      path: '/record/:id',
       component: VisualizationView
     }
     /* Another routing example
