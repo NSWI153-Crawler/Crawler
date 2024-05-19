@@ -22,6 +22,31 @@ namespace Infrastructure.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Entities.Execution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("SitesCrawled")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("WebsiteRecordId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteRecordId");
+
+                    b.ToTable("Executions");
+                });
+
             modelBuilder.Entity("Domain.Entities.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -32,7 +57,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("WebsiteRecordId")
+                    b.Property<Guid>("WebsiteRecordId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
@@ -59,6 +84,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Periodicity")
                         .HasColumnType("int");
 
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -68,15 +96,28 @@ namespace Infrastructure.Migrations
                     b.ToTable("WebsiteRecords");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Tag", b =>
+            modelBuilder.Entity("Domain.Entities.Execution", b =>
                 {
                     b.HasOne("Domain.Entities.WebsiteRecord", null)
-                        .WithMany("Tags")
+                        .WithMany("Executions")
                         .HasForeignKey("WebsiteRecordId");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Tag", b =>
+                {
+                    b.HasOne("Domain.Entities.WebsiteRecord", "WebsiteRecord")
+                        .WithMany("Tags")
+                        .HasForeignKey("WebsiteRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebsiteRecord");
                 });
 
             modelBuilder.Entity("Domain.Entities.WebsiteRecord", b =>
                 {
+                    b.Navigation("Executions");
+
                     b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618

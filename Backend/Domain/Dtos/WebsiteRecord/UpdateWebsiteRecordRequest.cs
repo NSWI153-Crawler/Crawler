@@ -1,7 +1,6 @@
-﻿using Api.ApiDtos.Tag;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace Api.ApiDtos.WebsiteRecord
+namespace Domain.Dtos
 {
     public class UpdateWebsiteRecordRequest
     {

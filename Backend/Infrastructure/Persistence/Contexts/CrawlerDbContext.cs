@@ -13,6 +13,7 @@ namespace Infrastructure.Persistence.Contexts
         public CrawlerDbContext(DbContextOptions<CrawlerDbContext> dbContextOptions) : base(dbContextOptions) { }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<WebsiteRecord> WebsiteRecords { get; set; }
+        public DbSet<Execution> Executions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

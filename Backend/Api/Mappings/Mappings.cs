@@ -1,6 +1,5 @@
-﻿using Api.ApiDtos.Tag;
-using Api.ApiDtos.WebsiteRecord;
-using AutoMapper;
+﻿using AutoMapper;
+using Domain.Dtos;
 using Domain.Entities;
 
 namespace Api.Mappings

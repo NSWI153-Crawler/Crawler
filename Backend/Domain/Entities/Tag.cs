@@ -11,5 +11,7 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public Guid WebsiteRecordId { get; set; }
+        public WebsiteRecord WebsiteRecord { get; set; }
     }
 }

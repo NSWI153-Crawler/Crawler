@@ -1,5 +1,5 @@
-﻿using Api.ApiDtos.WebsiteRecord;
-using AutoMapper;
+﻿using AutoMapper;
+using Domain.Dtos;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Http;
