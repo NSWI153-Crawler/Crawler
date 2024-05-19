@@ -26,7 +26,7 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<WebsiteRecord?> DeleteAsync(Guid id)
         {
-            var existingWebsiteRecord = await dbContext.WebsiteRecords.FirstOrDefaultAsync(x => x.Id == id);
+            var existingWebsiteRecord = await dbContext.WebsiteRecords.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
             if (existingWebsiteRecord == null)
             {
                 return null;
@@ -36,14 +36,15 @@ namespace Infrastructure.Persistence.Repositories
             return existingWebsiteRecord;
         }
 
+
         public async Task<List<WebsiteRecord>> GetAllAsync()
         {
-            return await dbContext.WebsiteRecords.ToListAsync();
+            return await dbContext.WebsiteRecords.Include(x => x.Tags).ToListAsync();
         }
 
         public async Task<WebsiteRecord?> GetByIdAsync(Guid id)
         {
-            return await dbContext.WebsiteRecords.FirstOrDefaultAsync(x => x.Id == id);
+            return await dbContext.WebsiteRecords.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<WebsiteRecord?> UpdateAsync(Guid id, WebsiteRecord record)
