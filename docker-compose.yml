@@ -1,0 +1,49 @@
+version: '3.9'
+ 
+services:
+  backend:
+    build: ./Backend/
+    ports:
+      - "8082:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      MYSQL_ROOT_PASSWORD: rootpassword 
+      MYSQL_DATABASE: crawler
+      MYSQL_USER: testUser
+      MYSQL_PASSWORD: testPassword
+    depends_on:
+      - db
+
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword 
+      MYSQL_DATABASE: crawler
+      MYSQL_USER: testUser
+      MYSQL_PASSWORD: testPassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./Database/mysqlData/:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -prootpassword"]
+      timeout: 5s
+      interval: 10s
+      retries: 10
+    restart: always
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+volumes:
+  dbdata:
+
