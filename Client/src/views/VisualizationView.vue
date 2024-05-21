@@ -142,7 +142,7 @@ const nodes: Record<string, Node> = reactive({
   node1: { name: "example.com", crawled: true },
   node2: { name: "http://example.com/home", crawled: true },
   node3: { name: "https://exam.com/info", crawled: true },
-  node4: { name: "https://www.exampl.com/about", crawled: true },
+  node4: { name: "https://www.exampl.com/about", crawled: false },
   node5: { name: "example.com/contact", crawled: false },
 })
 
@@ -324,12 +324,16 @@ function changeView(Nodes: NodePlaceHolder[], Edges: EdgePlaceHolder[]) {
 
 function convertWebsiteNodesToDomainNodes(websiteNodes: NodePlaceHolder[]): NodePlaceHolder[] {
   const domainNodes: NodePlaceHolder[] = []
-  const domainSet = new Set<string>()
   for (const [_, node] of Object.entries(websiteNodes)) {
     const domain = extractDomain(node[0])
-    if (domain && !domainSet.has(domain)) {
+    if (!domain) {
+      continue
+    }
+    if (!domainNodes.some(([domainName, _]) => domainName === domain)) {
       domainNodes.push([domain, node[1]])
-      domainSet.add(domain)
+    } else {
+      const index = domainNodes.findIndex(([domainName, _]) => domainName === domain)
+      domainNodes[index][1] = domainNodes[index][1] || node[1]
     }
   }
   return domainNodes
