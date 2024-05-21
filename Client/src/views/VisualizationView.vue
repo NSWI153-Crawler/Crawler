@@ -10,7 +10,7 @@
               : 'disabled-state',
             'button-style',
           ]"
-          @click="view_toggle = view_domain"
+          @click="toggleView('domain')"
         >
           Domain View
         </label>
@@ -21,7 +21,7 @@
               : 'disabled-state',
             'button-style',
           ]"
-          @click="view_toggle = view_website"
+          @click="toggleView('website')"
         >
           Website View
         </label>
@@ -130,53 +130,51 @@ const record = { // crawled = matches regexp
 interface Node extends vNG.Node {
   name: string
   crawled?: boolean
-  color?: string
-  size?: number
 }
 
 interface Edge extends vNG.Edge {
-  crawled?: boolean
-  width?: number
   color?: string
 }
 
 
-const nodes: Record<string, Node> = {
+const nodes: Record<string, Node> = reactive({
   node1: { name: "example.com", crawled: true },
-  node2: { name: "example.com/home", crawled: true },
-  node3: { name: "example.com/info", crawled: true },
-  node4: { name: "example.com/about", crawled: true },
+  node2: { name: "http://example.com/home", crawled: true },
+  node3: { name: "https://exam.com/info", crawled: true },
+  node4: { name: "https://www.exampl.com/about", crawled: true },
   node5: { name: "example.com/contact", crawled: false },
-}
+})
 
-const edges: Record<string, Edge> = {
-  edge1: { source: "node1", target: "node2", crawled: true },
-  edge2: { source: "node1", target: "node3", crawled: true },
-  edge3: { source: "node1", target: "node4", crawled: true },
-  edge4: { source: "node3", target: "node5", crawled: false },
-  edge5: { source: "node3", target: "node4", crawled: true },
-  edge6: { source: "node4", target: "node3", crawled: true },
-}
+const edges: Record<string, Edge> = reactive({
+  edge1: { source: "node1", target: "node2", },
+  edge2: { source: "node1", target: "node3", },
+  edge3: { source: "node1", target: "node4", },
+  edge4: { source: "node3", target: "node5", },
+  edge5: { source: "node3", target: "node4", },
+  edge6: { source: "node4", target: "node3", },
+})
 
 const configs = reactive(
   vNG.defineConfigs<Node, Edge>({
     node: {
       normal: { color: (node) => (node.crawled ? "#000" : "#999"), },
       hover:  { color: (node) => (node.crawled ? "#000" : "#999"), },
-      label:  { visible: node => !!node.name, },
+      label:  { visible: node => !!node.name,
+                color: (node) => (node.crawled ? "#000" : "#666"),
+      },
       focusring: { visible: false, },
       selectable: true,
     },
 
     edge: {
-      normal: { color: "#000", },
-      hover: { color: "#000", },
+      normal: { color: "#999", },
+      hover:  { color: "#999", },
       selectable: false,
       gap: 5,
       marker: {
         target: {
           type: "arrow",
-          width: 4,
+          width:  4,
           height: 4,
         },
       },
@@ -249,19 +247,120 @@ const eventHandlers: vNG.EventHandlers = {
   },
 }
 
+function extractDomain(url: string): string | null {
+  try {
+    const matches = url.match(/^(https?:\/\/)?(www.)?([^/?#]+)(?:[/?#]|$)/i);
+    const domain = matches && matches[3];
+    return domain;
+  } catch (error) {
+    console.error('Invalid URL:', error);
+    return null;
+  }
+}
+
+interface IdSetDictionary {
+  [key: number]: Set<any>;
+}
+type NodePair = [string, boolean];
+type EdgePair = [string, string];
+
+const websiteEdgesBackup: EdgePair[] = []
+const websiteNodesBackup: NodePair[] = []
+
+function changeView(toggleTo: 'domain' | 'website'){
+
+  let nextNodeIndex = 1;
+  let nextEdgeIndex = 1;
+
+  if (view_toggle.value === view_domain && toggleTo === 'website') {
+    /* show website view */
+    for (const [nodeID, _] of Object.entries(nodes))
+      delete nodes[nodeID]
+    for (const [edgeID, _] of Object.entries(edges))
+      delete edges[edgeID]
+    for (const node of websiteNodesBackup) {
+      const nodeName= `node${nextNodeIndex}`
+      nodes[nodeName] = { name: node[0], crawled: node[1] }
+      nextNodeIndex++
+    }
+    for (const edge of websiteEdgesBackup) {
+      const edgeName = `edge${nextEdgeIndex}`
+      edges[edgeName] = { source: edge[0], target: edge[1]}
+      nextEdgeIndex++
+    }
+  }
+  else if (view_toggle.value === view_website && toggleTo === 'domain') {
+    /* show domain view */
+    const domainEdges: IdSetDictionary = {} // domainSource: Set<domainTarget>
+    const domainNodes = new Set<string>()
+    const domainNodeIdMap = new Map<string, number>()
+
+    websiteNodesBackup.length = 0
+    for (const [_, node] of Object.entries(nodes)) {
+      websiteNodesBackup.push([node.name, node.crawled === true])
+      const domain = extractDomain(node.name)
+      if (domain)
+        domainNodes.add(domain)
+    }
+    for (const domain of domainNodes) {
+      domainNodeIdMap.set(domain, nextNodeIndex)
+      nextNodeIndex++
+    }
+
+    websiteEdgesBackup.length = 0
+    for (const [edgeID, edge] of Object.entries(edges)) {
+      websiteEdgesBackup.push([edge.source, edge.target])
+      const sourceDomain = domainNodeIdMap.get(extractDomain(nodes[edge.source].name) ?? "")
+      const targetDomain = domainNodeIdMap.get(extractDomain(nodes[edge.target].name) ?? "")
+      if (sourceDomain !== undefined && targetDomain !== undefined && sourceDomain !== targetDomain) {
+        if (domainEdges[sourceDomain]) domainEdges[sourceDomain].add(targetDomain)
+        else domainEdges[sourceDomain] = new Set([targetDomain])
+      }
+      delete edges[edgeID]
+    }
+    for (const [nodeID, _] of Object.entries(nodes)) {
+      delete nodes[nodeID]
+    }
+    for (const domain of domainNodes) {
+      const nodeName= `node${domainNodeIdMap.get(domain)}`
+      nodes[nodeName] = { name: domain, crawled: true }
+    }
+    for (const [source, targets] of Object.entries(domainEdges)) {
+      for (const target of targets) {
+        const edgeName = `edge${nextEdgeIndex}`
+        const sourceName = `node${source}`
+        const targetName = `node${target}`
+        edges[edgeName] = { source: sourceName, target: targetName}
+        nextEdgeIndex++
+      }
+    }
+  }
+  layout(layout_toggle.value === layout_lr ? "LR" : "TB")
+}
+
 const mode_static = "static"
 const mode_live = "live"
 const mode_toggle = ref(mode_static)
+function toggleMode() {}
+
 const view_domain = "domain"
 const view_website = "website"
 const view_toggle = ref(view_website)
+function toggleView(viewType: 'domain' | 'website') {
+  changeView(viewType)
+  if (viewType === 'domain') {
+    view_toggle.value = view_domain
+  }
+  else {
+    view_toggle.value = view_website
+  }
+}
+
 const layout_lr = "lr"
 const layout_tb = "tb"
 const layout_toggle = ref(layout_lr)
-function toggleMode() {}
-function toggleView() {}
 function toggleLayout(direction: "LR" | "TB"){
-  layout(direction)
+  updateLayout(direction)
   layout_toggle.value = direction === "LR" ? layout_lr : layout_tb
 }
 </script>
