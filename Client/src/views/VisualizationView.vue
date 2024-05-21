@@ -1,55 +1,55 @@
 <template>
   <h1 class="text-3xl font-bold text-center">{{ record.label }}</h1>
-  <div class="w-1/2 min-w-[500px] mx-auto mb-4">  <!-- bar holding top buttons -->
-    <div class="pl-4 float-left">                 <!-- view buttons container-->
+  <div class="w-1/2 min-w-[500px] mx-auto mb-4 mt-4"> <!-- bar holding top buttons -->
+    <div class="pl-4 float-left">                     <!-- view buttons container-->
       <div class="toggle-container">
         <label
           :class="[
-            view_toggle === view_domain
+            viewToggle === viewDomain
               ? 'bg-yellow-400 text-black'
               : 'disabled-state',
             'button-style',
           ]"
-          @click="toggleView('domain')"
+          @click="toggleView(viewDomain)"
         >
           Domain View
         </label>
         <label
           :class="[
-            view_toggle === view_website
+            viewToggle === viewWebsite
               ? 'bg-blue-600 text-white'
               : 'disabled-state',
             'button-style',
           ]"
-          @click="toggleView('website')"
+          @click="toggleView(viewWebsite)"
         >
           Website View
         </label>
       </div>
     </div>
 
-  <div class="flex space-x-1 pr-4 justify-end"> <!-- mode buttons container -->
+  <div class="flex space-x-1 pr-4 justify-end">   <!-- mode buttons container -->
     <div class="p-1 select-none cursor-default">Mode:</div>
     <div class="toggle-container">
       <label
         :class="[
-          mode_toggle === mode_static
+          modeToggle === modeStatic
             ? 'bg-orange-500 text-black'
             : 'disabled-state',
           'button-style',
         ]"
-        @click="mode_toggle = mode_static"
+        @click="toggleMode(modeStatic)"
       >
         Static
       </label>
       <label
         :class="[
-          mode_toggle === mode_live
+          modeToggle === modeLive
             ? 'bg-green-500 text-black'
             : 'disabled-state',
           'button-style',
         ]"
-        @click="mode_toggle = mode_live"
+        @click="toggleMode(modeLive)"
       >
         Live
       </label>
@@ -72,23 +72,23 @@
       <div class="toggle-container">
         <label
           :class="[
-              layout_toggle === layout_lr
+              layoutToggle === layoutLR
                 ? 'bg-[#0ff] text-black'
                 : 'disabled-state',
               'button-style',
             ]"
-          @click="toggleLayout('LR')"
+          @click="toggleLayout(layoutLR)"
         >
           Left to Right
         </label>
         <label
           :class="[
-              layout_toggle === layout_tb
+              layoutToggle === layoutTB
                 ? 'bg-[#0ff] text-black'
                 : 'disabled-state',
               'button-style',
             ]"
-          @click="toggleLayout('TB')"
+          @click="toggleLayout(layoutTB)"
         >
           Top to Bottom
         </label>
@@ -104,6 +104,7 @@ import { useWebsiteRecordStore } from '../stores/records'
 import { useRoute } from 'vue-router'
 import dagre from "@dagrejs/dagre"
 
+const graph = ref<vNG.VNetworkGraphInstance>()
 const route = useRoute()
 const store = useWebsiteRecordStore()
 let id = ""
@@ -126,16 +127,16 @@ const record = { // crawled = matches regexp
   lastExecutionStatus: "Success",
 }
 
-
 interface Node extends vNG.Node {
   name: string
-  crawled?: boolean
+  crawled: boolean
 }
+type NodePlaceHolder = [string, boolean];
 
 interface Edge extends vNG.Edge {
   color?: string
 }
-
+type EdgePlaceHolder = [string, string];
 
 const nodes: Record<string, Node> = reactive({
   node1: { name: "example.com", crawled: true },
@@ -154,8 +155,7 @@ const edges: Record<string, Edge> = reactive({
   edge6: { source: "node4", target: "node3", },
 })
 
-const configs = reactive(
-  vNG.defineConfigs<Node, Edge>({
+const configs = reactive(vNG.defineConfigs<Node, Edge>({
     node: {
       normal: { color: (node) => (node.crawled ? "#000" : "#999"), },
       hover:  { color: (node) => (node.crawled ? "#000" : "#999"), },
@@ -186,8 +186,78 @@ const layouts: vNG.Layouts = reactive({
   nodes: {},
 })
 
+const eventHandlers: vNG.EventHandlers = {
+  "node:dblclick": ({ node }) => {
+    if (nodes[node].crawled) {
+      console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
+    }
+    else {
+      console.log("open node detail: URL");
+    }
+  },
+}
+
+let websiteNodes: NodePlaceHolder[] = []
+let websiteEdges: EdgePlaceHolder[] = []
+let domainNodes: NodePlaceHolder[]
+let domainEdges: EdgePlaceHolder[]
+
+for (const [_, node] of Object.entries(nodes)) {
+  websiteNodes.push([node.name, node.crawled])
+}
+for (const [_, edge] of Object.entries(edges)) {
+  websiteEdges.push([nodes[edge.source].name, nodes[edge.target].name])
+}
+domainNodes = convertWebsiteNodesToDomainNodes(websiteNodes)
+domainEdges = convertWebsiteEdgesToDomainEdges(websiteEdges)
+
+const modeStatic = "static"
+const modeLive = "live"
+const modeToggle = ref(modeStatic)
+
+const layoutLR = "LR"
+const layoutTB = "TB"
+const layoutToggle = ref(layoutLR)
+
+const viewDomain = "domain"
+const viewWebsite = "website"
+const viewToggle = ref(viewWebsite)
+
 const nodeSize = 40
-const graph = ref<vNG.VNetworkGraphInstance>()
+
+function toggleMode(mode: "static" | "live") {
+  if (mode === modeToggle.value)
+    return
+  modeToggle.value = mode
+  if (mode === modeStatic) {
+    //TODO
+  }
+}
+
+function toggleLayout(direction: "LR" | "TB"){
+  if (direction === layoutToggle.value)
+    return
+  updateLayout(direction)
+  layoutToggle.value = direction
+}
+
+function toggleView(viewType: 'domain' | 'website') {
+  if (viewType === viewToggle.value)
+    return
+  viewToggle.value = viewType
+  if (viewType === 'domain')
+    changeView(domainNodes, domainEdges)
+  if (viewType === 'website')
+    changeView(websiteNodes, websiteEdges)
+  layout(layoutToggle.value === layoutLR ? "LR" : "TB")
+}
+
+function updateLayout(direction: "TB" | "LR") {
+  // Animates the movement of an element.
+  graph.value?.transitionWhile(() => {
+    layout(direction)
+  })
+}
 
 function layout(direction: "TB" | "LR") {
   if (Object.keys(nodes).length <= 1 || Object.keys(edges).length == 0) {
@@ -229,22 +299,52 @@ function layout(direction: "TB" | "LR") {
   })
 }
 
-function updateLayout(direction: "TB" | "LR") {
-  // Animates the movement of an element.
-  graph.value?.transitionWhile(() => {
-    layout(direction)
-  })
+function changeView(Nodes: NodePlaceHolder[], Edges: EdgePlaceHolder[]) {
+  for (const [nodeID, _] of Object.entries(nodes)) {
+    delete nodes[nodeID]
+  }
+  for (const [edgeID, _] of Object.entries(edges)) {
+    delete edges[edgeID]
+  }
+  for (const node of Nodes) {
+    const nodeName = `node${Object.keys(nodes).length + 1}`
+    nodes[nodeName] = {
+      name: node[0],
+      crawled: node[1]
+    }
+  }
+  for (const edge of Edges) {
+    const edgeName = `edge${Object.keys(edges).length + 1}`
+    edges[edgeName] = {
+      source: `node${Object.keys(nodes).findIndex((nodeID) => nodes[nodeID].name === edge[0]) + 1}`,
+      target: `node${Object.keys(nodes).findIndex((nodeID) => nodes[nodeID].name === edge[1]) + 1}`
+    }
+  }
 }
 
-const eventHandlers: vNG.EventHandlers = {
-  "node:dblclick": ({ node }) => {
-    if (nodes[node].crawled) {
-      console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
+function convertWebsiteNodesToDomainNodes(websiteNodes: NodePlaceHolder[]): NodePlaceHolder[] {
+  const domainNodes: NodePlaceHolder[] = []
+  const domainSet = new Set<string>()
+  for (const [_, node] of Object.entries(websiteNodes)) {
+    const domain = extractDomain(node[0])
+    if (domain && !domainSet.has(domain)) {
+      domainNodes.push([domain, node[1]])
+      domainSet.add(domain)
     }
-    else {
-      console.log("open node detail: URL");
+  }
+  return domainNodes
+}
+
+function convertWebsiteEdgesToDomainEdges(websiteEdges: EdgePlaceHolder[]): EdgePlaceHolder[] {
+  const domainEdges: EdgePlaceHolder[] = []
+  for (const [_, edge] of Object.entries(websiteEdges)) {
+    const sourceDomain = extractDomain(edge[0]) ?? ""
+    const targetDomain = extractDomain(edge[1]) ?? ""
+    if (sourceDomain !== targetDomain) {
+      domainEdges.push([sourceDomain, targetDomain])
     }
-  },
+  }
+  return domainEdges
 }
 
 function extractDomain(url: string): string | null {
@@ -256,111 +356,5 @@ function extractDomain(url: string): string | null {
     console.error('Invalid URL:', error);
     return null;
   }
-}
-
-interface IdSetDictionary {
-  [key: number]: Set<any>;
-}
-type NodePair = [string, boolean];
-type EdgePair = [string, string];
-
-const websiteEdgesBackup: EdgePair[] = []
-const websiteNodesBackup: NodePair[] = []
-
-function changeView(toggleTo: 'domain' | 'website'){
-
-  let nextNodeIndex = 1;
-  let nextEdgeIndex = 1;
-
-  if (view_toggle.value === view_domain && toggleTo === 'website') {
-    /* show website view */
-    for (const [nodeID, _] of Object.entries(nodes))
-      delete nodes[nodeID]
-    for (const [edgeID, _] of Object.entries(edges))
-      delete edges[edgeID]
-    for (const node of websiteNodesBackup) {
-      const nodeName= `node${nextNodeIndex}`
-      nodes[nodeName] = { name: node[0], crawled: node[1] }
-      nextNodeIndex++
-    }
-    for (const edge of websiteEdgesBackup) {
-      const edgeName = `edge${nextEdgeIndex}`
-      edges[edgeName] = { source: edge[0], target: edge[1]}
-      nextEdgeIndex++
-    }
-  }
-  else if (view_toggle.value === view_website && toggleTo === 'domain') {
-    /* show domain view */
-    const domainEdges: IdSetDictionary = {} // domainSource: Set<domainTarget>
-    const domainNodes = new Set<string>()
-    const domainNodeIdMap = new Map<string, number>()
-
-    websiteNodesBackup.length = 0
-    for (const [_, node] of Object.entries(nodes)) {
-      websiteNodesBackup.push([node.name, node.crawled === true])
-      const domain = extractDomain(node.name)
-      if (domain)
-        domainNodes.add(domain)
-    }
-    for (const domain of domainNodes) {
-      domainNodeIdMap.set(domain, nextNodeIndex)
-      nextNodeIndex++
-    }
-
-    websiteEdgesBackup.length = 0
-    for (const [edgeID, edge] of Object.entries(edges)) {
-      websiteEdgesBackup.push([edge.source, edge.target])
-      const sourceDomain = domainNodeIdMap.get(extractDomain(nodes[edge.source].name) ?? "")
-      const targetDomain = domainNodeIdMap.get(extractDomain(nodes[edge.target].name) ?? "")
-      if (sourceDomain !== undefined && targetDomain !== undefined && sourceDomain !== targetDomain) {
-        if (domainEdges[sourceDomain]) domainEdges[sourceDomain].add(targetDomain)
-        else domainEdges[sourceDomain] = new Set([targetDomain])
-      }
-      delete edges[edgeID]
-    }
-    for (const [nodeID, _] of Object.entries(nodes)) {
-      delete nodes[nodeID]
-    }
-    for (const domain of domainNodes) {
-      const nodeName= `node${domainNodeIdMap.get(domain)}`
-      nodes[nodeName] = { name: domain, crawled: true }
-    }
-    for (const [source, targets] of Object.entries(domainEdges)) {
-      for (const target of targets) {
-        const edgeName = `edge${nextEdgeIndex}`
-        const sourceName = `node${source}`
-        const targetName = `node${target}`
-        edges[edgeName] = { source: sourceName, target: targetName}
-        nextEdgeIndex++
-      }
-    }
-  }
-  layout(layout_toggle.value === layout_lr ? "LR" : "TB")
-}
-
-const mode_static = "static"
-const mode_live = "live"
-const mode_toggle = ref(mode_static)
-function toggleMode() {}
-
-const view_domain = "domain"
-const view_website = "website"
-const view_toggle = ref(view_website)
-function toggleView(viewType: 'domain' | 'website') {
-  changeView(viewType)
-  if (viewType === 'domain') {
-    view_toggle.value = view_domain
-  }
-  else {
-    view_toggle.value = view_website
-  }
-}
-
-const layout_lr = "lr"
-const layout_tb = "tb"
-const layout_toggle = ref(layout_lr)
-function toggleLayout(direction: "LR" | "TB"){
-  updateLayout(direction)
-  layout_toggle.value = direction === "LR" ? layout_lr : layout_tb
 }
 </script>
