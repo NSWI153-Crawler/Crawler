@@ -1,62 +1,66 @@
 <template>
-  <h1 class="text-3xl font-bold text-center">{{ record.label }}</h1>
-  <div class="w-1/2 min-w-[500px] mx-auto mb-4 mt-4"> <!-- bar holding top buttons -->
-    <div class="pl-4 float-left">                     <!-- view buttons container-->
+  <div>
+
+  <h1 class="text-3xl font-bold text-center">Graph</h1>
+  <div class="w-1/2 min-w-[500px] mx-auto my-4">    <!-- bar holding top buttons -->
+
+    <div class="pl-4 float-left">                   <!-- view buttons container-->
       <div class="toggle-container">
         <label
           :class="[
-            viewToggle === viewDomain
+            viewToggle === viewDomains
               ? 'bg-yellow-400 text-black'
               : 'disabled-state',
             'button-style',
           ]"
-          @click="toggleView(viewDomain)"
+          @click="toggleView(viewDomains)"
         >
           Domain View
         </label>
         <label
           :class="[
-            viewToggle === viewWebsite
+            viewToggle === viewWebsites
               ? 'bg-blue-600 text-white'
               : 'disabled-state',
             'button-style',
           ]"
-          @click="toggleView(viewWebsite)"
+          @click="toggleView(viewWebsites)"
         >
           Website View
         </label>
       </div>
     </div>
 
-  <div class="flex space-x-1 pr-4 justify-end">   <!-- mode buttons container -->
-    <div class="p-1 select-none cursor-default">Mode:</div>
-    <div class="toggle-container">
-      <label
-        :class="[
-          modeToggle === modeStatic
-            ? 'bg-orange-500 text-black'
-            : 'disabled-state',
-          'button-style',
-        ]"
-        @click="toggleMode(modeStatic)"
-      >
-        Static
-      </label>
-      <label
-        :class="[
-          modeToggle === modeLive
-            ? 'bg-green-500 text-black'
-            : 'disabled-state',
-          'button-style',
-        ]"
-        @click="toggleMode(modeLive)"
-      >
-        Live
-      </label>
+    <div class="flex space-x-1 pr-4 justify-end">   <!-- mode buttons container -->
+      <div class="p-1 select-none cursor-default">Mode:</div>
+      <div class="toggle-container">
+        <label
+          :class="[
+            modeToggle === modeStatic
+              ? 'bg-orange-500 text-black'
+              : 'disabled-state',
+            'button-style',
+          ]"
+          @click="toggleMode(modeStatic)"
+        >
+          Static
+        </label>
+        <label
+          :class="[
+            modeToggle === modeLive
+              ? 'bg-green-500 text-black'
+              : 'disabled-state',
+            'button-style',
+          ]"
+          @click="toggleMode(modeLive)"
+        >
+          Live
+        </label>
+      </div>
     </div>
   </div>
-  </div>
-  <div class="w-1/2 min-w-[500px] border border-black rounded-lg overflow-hidden relative mx-auto h-[600px]">
+
+  <div class="w-1/2 min-w-[500px] border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"> <!-- graph container -->
     <v-network-graph class="graph"
                      ref="graph"
                      :nodes="nodes"
@@ -66,7 +70,8 @@
                      :eventHandlers="eventHandlers"
     />
   </div>
-  <div class="w-1/2 min-w-[500px] mx-auto mb-4 mt-4">   <!-- bar holding bottom buttons -->
+
+  <div class="w-1/2 min-w-[500px] mx-auto my-4">   <!-- bar holding bottom buttons -->
     <div class="flex space-x-1 pr-4 justify-center">    <!-- layout buttons container -->
       <div class="p-1 select-none cursor-default">Layout:</div>
       <div class="toggle-container">
@@ -95,14 +100,19 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import * as vNG from "v-network-graph"
-import { computed, onMounted, reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref, defineComponent } from "vue"
 import { useWebsiteRecordStore } from '../stores/records'
 import { useRoute } from 'vue-router'
 import dagre from "@dagrejs/dagre"
+
+defineComponent({
+  name: "VisualizationComponent",
+})
 
 const graph = ref<vNG.VNetworkGraphInstance>()
 const route = useRoute()
@@ -120,7 +130,7 @@ const record = { // crawled = matches regexp
   url: "http://example.com",
   regexp: ".*",
   periodicity: 24,
-  label: "example.com",
+  label: "Record Label",
   isActive: true,
   tags: ["example", "com"],
   lastExecutionTime: "2021-09-01T00:00:00Z",
@@ -186,8 +196,13 @@ const layouts: vNG.Layouts = reactive({
   nodes: {},
 })
 
+
+
+
 const eventHandlers: vNG.EventHandlers = {
-  "node:dblclick": ({ node }) => {
+  "node:dblclick": ({ node, event }) => {
+    if (viewToggle.value !== viewWebsites)
+      return
     if (nodes[node].crawled) {
       console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
     }
@@ -219,9 +234,9 @@ const layoutLR = "LR"
 const layoutTB = "TB"
 const layoutToggle = ref(layoutLR)
 
-const viewDomain = "domain"
-const viewWebsite = "website"
-const viewToggle = ref(viewWebsite)
+const viewDomains = "domain"
+const viewWebsites = "website"
+const viewToggle = ref(viewWebsites)
 
 const nodeSize = 40
 
@@ -235,10 +250,9 @@ function toggleMode(mode: "static" | "live") {
 }
 
 function toggleLayout(direction: "LR" | "TB"){
-  if (direction === layoutToggle.value)
-    return
   updateLayout(direction)
-  layoutToggle.value = direction
+  if (direction !== layoutToggle.value)
+    layoutToggle.value = direction
 }
 
 function toggleView(viewType: 'domain' | 'website') {
