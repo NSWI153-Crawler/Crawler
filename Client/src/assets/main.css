@@ -2,7 +2,7 @@
 @tailwind components;
 
 .button-style {
-  @apply px-4 py-1 select-none cursor-pointer transition-colors duration-0;
+  @apply px-4 py-1 select-none cursor-pointer;
 }
 
 .disabled-state {
@@ -10,7 +10,7 @@
 }
 
 .toggle-container {
-  @apply flex border border-black rounded-lg overflow-hidden;
+  @apply flex border border-black dark:border-gray-700 rounded-lg overflow-hidden;
 }
 
 @tailwind utilities;
