@@ -55,10 +55,14 @@ function toggleDarkMode(darkMode: boolean) {
         </button>
       </div>
     </div>
-
   </header>
 
   <RouterView />
+
+  <footer class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg">
+    <p>© 2024 Web Crawler</p>
+  </footer>
+
 </template>
 
 <style scoped></style>
