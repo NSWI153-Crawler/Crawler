@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="dark:bg-dark-bg">
 
-  <h1 class="text-3xl font-bold text-center">Graph</h1>
+  <h1 class="pb-2 mb-2 text-3xl text-center border-b border-b-dark-bg dark:border-b-dark-fg dark:text-dark-fg">Graph</h1>
   <div class="w-1/2 min-w-[500px] mx-auto my-4">    <!-- bar holding top buttons -->
 
     <div class="pl-4 float-left">                   <!-- view buttons container-->
@@ -32,7 +32,7 @@
     </div>
 
     <div class="flex space-x-1 pr-4 justify-end">   <!-- mode buttons container -->
-      <div class="p-1 select-none cursor-default">Mode:</div>
+      <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
       <div class="toggle-container">
         <label
           :class="[
@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <div class="w-1/2 min-w-[500px] border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"> <!-- graph container -->
+  <div class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"> <!-- graph container -->
     <v-network-graph class="graph"
                      ref="graph"
                      :nodes="nodes"
@@ -73,7 +73,7 @@
 
   <div class="w-1/2 min-w-[500px] mx-auto my-4">   <!-- bar holding bottom buttons -->
     <div class="flex space-x-1 pr-4 justify-center">    <!-- layout buttons container -->
-      <div class="p-1 select-none cursor-default">Layout:</div>
+      <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
       <div class="toggle-container">
         <label
           :class="[
@@ -117,25 +117,10 @@ defineComponent({
 const graph = ref<vNG.VNetworkGraphInstance>()
 const route = useRoute()
 const store = useWebsiteRecordStore()
-let id = ""
 
 onMounted(() => {
-  id = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
-  // store.fetchRecordById(id)
   layout("LR")
 })
-// const record = computed(() => store.getRecordById(id)) TODO
-const record = { // crawled = matches regexp
-  id: "1",
-  url: "http://example.com",
-  regexp: ".*",
-  periodicity: 24,
-  label: "Record Label",
-  isActive: true,
-  tags: ["example", "com"],
-  lastExecutionTime: "2021-09-01T00:00:00Z",
-  lastExecutionStatus: "Success",
-}
 
 interface Node extends vNG.Node {
   name: string
