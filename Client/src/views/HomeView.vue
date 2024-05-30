@@ -1,12 +1,11 @@
 <template>
 
-  <div class="p-6">
+  <div class="p-6 min-w-[660px]">
+    <WebsiteRecordListComponentVue class="mb-4 p-4 bg-white dark:bg-[#0A1124] dark:text-white shadow rounded flex-grow" />
     <div class="flex flex-wrap">
       <ExecutionListComponent class="border-2 border-dark-bg dark:border-dark-fg px-6 py-2 rounded-2xl xl:ml-auto xl:mr-5 mx-auto mb-6" />
       <visualization-component class="border-2 border-dark-bg dark:border-dark-fg px-6 py-2 rounded-2xl xl:mr-auto xl:ml-5 mx-auto mb-6" />
     </div>
-    <WebsiteRecordListComponentVue class="mb-4 p-4 bg-white dark:bg-[#0A1124] dark:text-white shadow rounded flex-grow" />
-
   </div>
 </template>
 

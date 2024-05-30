@@ -20,7 +20,7 @@ function toggleDarkMode(darkMode: boolean) {
 <template>
   <header
     :style="{ backgroundImage: isDarkMode ? 'url(/static/banner.jpg)' : 'url(/static/banner-light.jpg)' }"
-    class="text-5xl font-bold text-center py-12 bg-center px-6 bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg">
+    class="text-5xl font-bold text-center py-12 bg-center px-6 bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg min-w-[660px]">
     <div>
       <h1 class="text-[#0A1124] dark:text-[#fff]">
         Web Crawler</h1>
@@ -59,7 +59,7 @@ function toggleDarkMode(darkMode: boolean) {
 
   <RouterView />
 
-  <footer class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg">
+  <footer class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg min-w-[660px]">
     <p>© 2024 Web Crawler</p>
   </footer>
 

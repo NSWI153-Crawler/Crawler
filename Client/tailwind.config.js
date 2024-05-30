@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        'sun-yellow': '#f7f700',
+        'sun-yellow': '#F7F700',
         'moon-blue': '#D9DCEB',
         'dark-bg': '#0A1124',
         'dark-fg': '#D9DCEB',

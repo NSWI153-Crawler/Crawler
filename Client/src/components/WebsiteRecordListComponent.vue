@@ -8,21 +8,21 @@
           v-model="filter.url"
           placeholder="URL"
           @input="fetchRecords"
-          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-[#D9DCEB] text-gray-700 leading-tight focus:outline-none focus:shadow-outline hover:border-blue-500"
+          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-dark-fg text-gray-700 leading-tight focus:outline-none focus:shadow-outline hover:border-blue-500"
         />
         <input
           id="filter"
           v-model="filter.label"
           placeholder="Label"
           @input="fetchRecords"
-          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-[#D9DCEB] text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2 hover:border-blue-500"
+          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-dark-fg text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2 hover:border-blue-500"
         />
         <input
           id="filter"
           v-model="filter.tags"
           placeholder="Tags"
           @input="fetchRecords"
-          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-[#D9DCEB] text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2 hover:border-blue-500"
+          class="shadow appearance-none border rounded w-full py-2 px-3 dark:bg-dark-fg text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2 hover:border-blue-500"
         />
       </div>
 
@@ -32,7 +32,7 @@
           id="sort"
           v-model="sort"
           @change="fetchRecords"
-          class="form-select block w-full mt-1 shadow appearance-none border rounded py-2 px-3 dark:bg-[#D9DCEB] text-gray-700 leading-tight focus:outline-none focus:shadow-outline hover:border-blue-500"
+          class="form-select block w-full mt-1 shadow appearance-none border rounded py-2 px-3 dark:bg-dark-fg text-gray-700 leading-tight focus:outline-none focus:shadow-outline hover:border-blue-500"
         >
           <option value="url">URL</option>
           <option value="label">Label</option>
@@ -43,21 +43,26 @@
         </select>
       </div>
     </div>
-    <div v-for="record in records" :key="record.id" class="mb-4 p-4 bg-white dark:bg-[#0A1124] dark:text-white rounded shadow">
+    <button class="button-style border-2 border-dark-bg rounded-2xl">Create New Record</button>
+    <div v-for="record in records" :key="record.id" class="mb-4 p-4 bg-white dark:bg-dark-bg dark:text-dark-fg rounded shadow">
       <h2 class="text-xl font-bold mb-2">{{ record.label }}</h2>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]"><strong>URL:</strong> {{ record.url }}</p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]"><strong>RegExp:</strong> {{ record.regexp }}</p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]"><strong>Periodicity:</strong> {{ record.periodicity }}</p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]"><strong>Tags:</strong> {{ record.tags.join(', ') }}</p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]">
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>URL:</strong> {{ record.url }}</p>
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>RegExp:</strong> {{ record.regexp }}</p>
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>Periodicity:</strong> {{ record.periodicity }}</p>
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>Tags:</strong> {{ record.tags.join(', ') }}</p>
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
         <strong >Last Execution Time:</strong> {{ record.lastExecutionTime }}
       </p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]">
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
         <strong>Last Execution Status:</strong> {{ record.lastExecutionStatus }}
       </p>
-      <p class="text-gray-700 dark:bg-[#0A1124] dark:text-[#D9DCEB]">
+      <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
         <strong>Status:</strong> {{ record.isActive ? 'Active' : 'Inactive' }}
       </p>
+      <button class="button-style">Update (+ toggle for active?)</button>
+      <button class="button-style">Add to Active Selection</button>
+      <button class="button-style">Crawl</button>
+      <button class="button-style">Delete record</button>
     </div>
 
     <div class="flex justify-center space-x-4">
@@ -108,6 +113,17 @@ const records = [
     lastExecutionStatus: 'success',
     isActive: true,
   },
+  {
+    id: 2,
+    url: 'https://example2.com',
+    regexp: '.*',
+    label: 'Example 2',
+    periodicity: 'weekly',
+    tags: ['example', 'test'],
+    lastExecutionTime: '2021-09-01T00:00:00Z',
+    lastExecutionStatus: 'success',
+    isActive: true,
+  }
   // TODO: communication with server
 ]
 const totalPages = computed(() => Math.ceil(store.totalRecords / pageSize.value))
