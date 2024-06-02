@@ -111,20 +111,23 @@ const executions = ref([
 
 const currentPage = ref(1);
 const pageSize = ref(11);
-
-const paginatedExecutions = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredExecutions.value.slice(start, end);
-});
-
 const sortColumn = ref('time');
 const sortOrder = ref('desc');
+
+const uniqueExecutions = computed(() => {
+  const uniqueLabels = new Set();
+  return executions.value.filter(execution => {
+    if (!uniqueLabels.has(execution.label)) {
+      uniqueLabels.add(execution.label);
+      return true;
+    }
+    return false;
+  });
+});
 
 const sortedExecutions = computed(() => {
   if (!sortColumn.value)
     return executions.value;
-
   const sorted = [...executions.value];
   sorted.sort((a: any, b: any) => {
     if (a[sortColumn.value] < b[sortColumn.value])
@@ -133,8 +136,23 @@ const sortedExecutions = computed(() => {
       return sortOrder.value === 'asc' ? 1 : -1;
     return 0;
   });
-
   return sorted;
+});
+
+const filteredExecutions = computed(() => {
+  const checkedLabels = new Set();
+  uniqueExecutions.value.forEach(execution => {
+    if (execution.checked) {
+      checkedLabels.add(execution.label);
+    }
+  });
+  return sortedExecutions.value.filter(execution => checkedLabels.has(execution.label));
+});
+
+const paginatedExecutions = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredExecutions.value.slice(start, end);
 });
 
 const sortTable = (column: string) => {
@@ -153,44 +171,23 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('cs-CZ', options);
 }
 
-const uniqueExecutions = computed(() => {
-  const uniqueLabels = new Set();
-  return executions.value.filter(execution => {
-    if (!uniqueLabels.has(execution.label)) {
-      uniqueLabels.add(execution.label);
-      return true;
-    }
-    return false;
-  });
-});
-
-const filteredExecutions = computed(() => {
-  const checkedLabels = new Set();
-  uniqueExecutions.value.forEach(execution => {
-    if (execution.checked) {
-      checkedLabels.add(execution.label);
-    }
-  });
-  return sortedExecutions.value.filter(execution => checkedLabels.has(execution.label));
-});
-
 const allChecked = computed({
   get: () => executions.value.every(execution => execution.checked),
   set: newValue => executions.value.forEach(execution => execution.checked = newValue),
 })
 
-const expanded = ref(false)
+const filterBoxExpanded = ref(false)
 
 const showCheckboxes = () => {
   const checkboxes = document.getElementById("checkboxes");
   if (!checkboxes)
     return
-  if (!expanded.value) {
+  if (!filterBoxExpanded.value) {
     checkboxes.style.display = "block";
-    expanded.value = true;
+    filterBoxExpanded.value = true;
   } else {
     checkboxes.style.display = "none";
-    expanded.value = false;
+    filterBoxExpanded.value = false;
   }
 }
 
@@ -199,7 +196,7 @@ const hideCheckboxes = () => {
   if (!checkboxes)
     return
   checkboxes.style.display = "none";
-  expanded.value = false;
+  filterBoxExpanded.value = false;
 }
 
 const onClickOutside = (event: MouseEvent ) => {

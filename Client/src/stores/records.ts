@@ -13,6 +13,14 @@ interface WebsiteRecord {
   lastExecutionStatus: string
 }
 
+interface ExecutionRecord {
+  id: string
+  title: string
+  crawlTime: string
+  links?: string[]
+  owner?: WebsiteRecord
+}
+
 interface FilterCriteria {
   url?: string
   label?: string

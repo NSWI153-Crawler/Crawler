@@ -14,13 +14,14 @@ function toggleDarkMode(darkMode: boolean) {
     document.documentElement.classList.remove('dark')
   }
 }
-
+//  bg-[#A5F700] dark:bg-[#174400]
 </script>
 
 <template>
   <header
     :style="{ backgroundImage: isDarkMode ? 'url(/static/banner.jpg)' : 'url(/static/banner-light.jpg)' }"
-    class="text-5xl font-bold text-center py-12 bg-center px-6 bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg min-w-[660px]">
+
+    class="text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg min-w-[660px]">
     <div>
       <h1 class="text-[#0A1124] dark:text-[#fff]">
         Web Crawler</h1>
