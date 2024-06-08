@@ -1,37 +1,27 @@
 version: '3.9'
- 
-services:
-  backend:
-    build: ./Backend/
-    ports:
-      - "8082:80"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      MYSQL_ROOT_PASSWORD: rootpassword 
-      MYSQL_DATABASE: crawler
-      MYSQL_USER: testUser
-      MYSQL_PASSWORD: testPassword
-    depends_on:
-      - db
 
+services:
   db:
-    image: mysql:latest
+    build: ./Database
     container_name: db
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword 
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: crawler
       MYSQL_USER: testUser
       MYSQL_PASSWORD: testPassword
     ports:
       - "3306:3306"
     volumes:
-      - ./Database/mysqlData/:/var/lib/mysql
+      - ./Database/mysqlData:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -uroot -prootpassword"]
       timeout: 5s
       interval: 10s
       retries: 10
     restart: always
+    networks:
+      - mynetwork
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: pma
@@ -43,7 +33,59 @@ services:
       PMA_ARBITRARY: 1
     restart: always
     ports:
-      - 8081:80
-volumes:
-  dbdata:
+      - "8081:80"
+    networks:
+      - mynetwork
+    depends_on:
+      - db
 
+  backend:
+    build: ./Backend/
+    ports:
+      - "3600:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "server=db;database=crawler;user=testUser;password=testPassword"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z db 3306"]
+      interval: 10s
+      retries: 10
+    networks:
+      - mynetwork
+  
+  migration:
+    build:
+      dockerfile: ./Infrastructure/Dockerfile
+      context: ./Backend/
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db 
+      MYSQL_DATABASE: crawler
+      MYSQL_USER: testUser
+      MYSQL_PASSWORD: testPassword
+    networks:
+      - mynetwork
+    entrypoint: 
+      "dotnet ef database update --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj --context Infrastructure.Persistence.Contexts.CrawlerDbContext"
+
+
+  frontend:
+    build: ./Client/
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - mynetwork
+
+volumes:
+  mysqlData:
+
+networks:
+  mynetwork:
+    driver: bridge

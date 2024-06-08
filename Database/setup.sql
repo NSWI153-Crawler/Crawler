@@ -1,1 +1,3 @@
-
+CREATE USER 'testUser'@'172.17.0.1' IDENTIFIED BY 'testPassword';
+GRANT ALL PRIVILEGES ON *.* TO 'testUser'@'172.17.0.1';
+FLUSH PRIVILEDGES;

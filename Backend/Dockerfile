@@ -14,16 +14,9 @@ COPY Infrastructure/Infrastructure.csproj ./Infrastructure/
 COPY Api/Api.csproj ./Api/
 RUN dotnet restore
 
-# Install EF Core tools
-RUN dotnet tool install --global dotnet-ef
-
-# Set the PATH to include the tools directory
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
 # Copy the remaining source code and build the application
 COPY . .
-WORKDIR /src/Infrastructure
-RUN dotnet ef database update --verbose --project Infrastructure.csproj --startup-project Infrastructure.csproj
+
 WORKDIR /src/Api
 RUN dotnet build -c Release -o /app
 
