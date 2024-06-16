@@ -1,25 +1,18 @@
-﻿using Domain.Common;
+﻿using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Domain.Dtos.Execution
 {
-    public enum ExecutionStatus
+    public class CreateExecutionRequest
     {
-        Success,
-        Failure
-    }
-    public class Execution : IEntity
-    {
-        public Guid Id { get; set; }
-        public DateTime StartTime {  get; set; }
+        public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public int SitesCrawled { get; set; }
         public ExecutionStatus Status { get; set; }
         public Guid WebsiteRecordId { get; set; }
-        public WebsiteRecord WebsiteRecord { get; set; }
     }
 }

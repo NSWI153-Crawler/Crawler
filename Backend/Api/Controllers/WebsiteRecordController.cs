@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Dtos;
+using Domain.Dtos.Execution;
 using Domain.Entities;
 using Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -11,36 +12,50 @@ namespace Api.Controllers
     [ApiController]
     public class WebsiteRecordController : ControllerBase
     {
-        private readonly IWebsiteRecordRepository repository;
+        private readonly IWebsiteRecordRepository websiteRecordRepository;
+        private readonly IExecutionRepository executionRepository;
         private readonly IMapper mapper;
 
-        public WebsiteRecordController(IWebsiteRecordRepository repository, IMapper mapper)
+        public WebsiteRecordController(IWebsiteRecordRepository websiteRecordRepository, IExecutionRepository executionRepository, IMapper mapper)
         {
-            this.repository = repository;
+            this.websiteRecordRepository = websiteRecordRepository;
+            this.executionRepository = executionRepository;
             this.mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var domain = await repository.GetAllAsync();
-            return Ok(mapper.Map<List<WebsiteRecordDto>>(domain));
+            var domain = await websiteRecordRepository.GetAllAsync();
+            var result = new List<WebsiteRecordDto>();
+            foreach(var websiteRecord in domain)
+            {
+                var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(websiteRecord);
+                var lastExecutionDto = mapper.Map<ExecutionDto?>(lastExecution);
+                var websiteRecordDto = mapper.Map<WebsiteRecordDto>(websiteRecord);
+                result.Add(WebsiteRecordDto.AddLastExecution(websiteRecordDto, lastExecutionDto));
+            }
+            return Ok(result);
         }
         [HttpGet]
         [Route("{id:Guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var domain = await repository.GetByIdAsync(id);
+            var domain = await websiteRecordRepository.GetByIdAsync(id);
             if (domain == null)
             {
                 return NotFound();
             }
-            return Ok(mapper.Map<WebsiteRecordDto>(domain));
+            var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(domain);
+            var lastExecutionDto = mapper.Map<ExecutionDto?>(lastExecution);
+            var websiteRecordDto = mapper.Map<WebsiteRecordDto>(domain);
+
+            return Ok(WebsiteRecordDto.AddLastExecution(websiteRecordDto, lastExecutionDto));
         }
         [HttpPost]
         public async Task<IActionResult> Post(CreateWebsiteRecordRequest request)
         {
             var domain = mapper.Map<WebsiteRecord>(request);
-            domain = await repository.CreateAsync(domain);
+            domain = await websiteRecordRepository.CreateAsync(domain);
             return Ok(mapper.Map<WebsiteRecordDto>(domain));
         }
         [HttpPut]
@@ -48,7 +63,7 @@ namespace Api.Controllers
         public async Task<IActionResult> Put(Guid id, UpdateWebsiteRecordRequest request)
         {
             var domain = mapper.Map<WebsiteRecord>(request);
-            domain = await repository.UpdateAsync(id, domain);
+            domain = await websiteRecordRepository.UpdateAsync(id, domain);
             if (domain == null)
             {
                 return NotFound();
@@ -59,7 +74,7 @@ namespace Api.Controllers
         [Route("{id:Guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var domain = await repository.DeleteAsync(id);
+            var domain = await websiteRecordRepository.DeleteAsync(id);
             if (domain == null)
             {
                 return NotFound();

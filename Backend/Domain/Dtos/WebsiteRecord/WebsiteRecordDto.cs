@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.Dtos.Execution;
+using Domain.Entities;
 using System.Text.RegularExpressions;
 
 namespace Domain.Dtos
@@ -6,7 +7,6 @@ namespace Domain.Dtos
     public class WebsiteRecordDto
     {
         public Guid Id { get; set; }
-        // todo types might change, lets see, how database will handle it
         public string Url { get; set; }
         public string BoundaryRegexp { get; set; }
         public int Periodicity { get; set; }
@@ -14,6 +14,21 @@ namespace Domain.Dtos
         public State State { get; set; }
 
         public List<TagDto> Tags { get; set; }
+        public ExecutionDto? LastExecution { get; set; }
+        public static WebsiteRecordDto AddLastExecution(WebsiteRecordDto websiteRecord, ExecutionDto? execution)
+        {
+            return new WebsiteRecordDto
+            {
+                Id = websiteRecord.Id,
+                Url = websiteRecord.Url,
+                BoundaryRegexp = websiteRecord.BoundaryRegexp,
+                Periodicity = websiteRecord.Periodicity,
+                Label = websiteRecord.Label,
+                State = websiteRecord.State,
+                Tags = websiteRecord.Tags,
+                LastExecution = execution
+            };
+        }
 
     }
 }

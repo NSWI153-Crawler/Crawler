@@ -36,7 +36,9 @@ namespace Infrastructure
                     .LogTo(Console.WriteLine, LogLevel.Information)
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
-            ).AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
+            ).AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>()
+            .AddScoped<IExecutionRepository, ExecutionRepository>()
+            .AddScoped<ICrawlNodeRepository, CrawlNodeRepository>();
         }
     }
 }
