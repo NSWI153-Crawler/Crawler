@@ -23,6 +23,6 @@ namespace Domain.Entities
         public State State { get; set; }
         public List<Tag> Tags { get; set; }
         public List<Execution> Executions { get; set; }
-        //public List<CrawlNode> { get; set; }
+        public List<CrawlNode> CrawlNodes { get; set; }
     }
 }

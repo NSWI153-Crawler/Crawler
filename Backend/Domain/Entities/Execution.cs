@@ -18,6 +18,7 @@ namespace Domain.Entities
         public DateTime StartTime {  get; set; }
         public DateTime EndTime { get; set; }
         public int SitesCrawled { get; set; }
-
+        public Guid WebsiteRecordId { get; set; }
+        public WebsiteRecord WebsiteRecord { get; set; }
     }
 }
