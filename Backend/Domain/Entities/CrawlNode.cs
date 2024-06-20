@@ -13,8 +13,13 @@ namespace Domain.Entities
         public string Url { get; set; }
         public int CrawlTime { get; set; }
         public string Title { get; set; }
+        public Guid OwnerId { get; set; }
+        public WebsiteRecord Owner { get; set; }
+        // parent
+        public Guid ParentNodeId { get; set; }
+        public CrawlNode ParentNode { get; set; }
         // children
         public List<CrawlNode> CrawlNodes { get; set; }
-        public WebsiteRecord Owner { get; set; }
+
     }
 }

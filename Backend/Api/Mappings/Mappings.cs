@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Dtos;
+using Domain.Dtos.Execution;
 using Domain.Entities;
 
 namespace Api.Mappings
@@ -11,6 +12,9 @@ namespace Api.Mappings
             CreateMap<WebsiteRecord, CreateWebsiteRecordRequest>().ReverseMap();
             CreateMap<WebsiteRecord, UpdateWebsiteRecordRequest>().ReverseMap();
             CreateMap<Tag, TagDto>().ReverseMap();
+            CreateMap<Execution, ExecutionDto>().ReverseMap();
+            CreateMap<Execution, CreateExecutionRequest>().ReverseMap();
+            CreateMap<Execution,  UpdateExecutionRequest>().ReverseMap();
         }
     }
 }

@@ -26,7 +26,12 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<WebsiteRecord?> DeleteAsync(Guid id)
         {
-            var existingWebsiteRecord = await dbContext.WebsiteRecords.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
+            var existingWebsiteRecord = await dbContext.WebsiteRecords
+                // we want to recursively delete all the associated tags, crawl nodes and executions
+                .Include(x => x.Tags)
+                .Include(y => y.CrawlNodes)
+                .Include(z => z.Executions)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (existingWebsiteRecord == null)
             {
                 return null;

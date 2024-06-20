@@ -4,6 +4,7 @@ using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CrawlerDbContext))]
-    partial class CrawlerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240616183838_added crawl nodes")]
+    partial class addedcrawlnodes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,7 +54,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ParentNodeId");
 
-                    b.ToTable("CrawlNodes");
+                    b.ToTable("CrawlNode");
                 });
 
             modelBuilder.Entity("Domain.Entities.Execution", b =>
@@ -68,9 +71,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("WebsiteRecordId")
                         .HasColumnType("char(36)");
