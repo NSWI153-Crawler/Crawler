@@ -1,126 +1,120 @@
 <template>
   <div class="bg-white dark:bg-dark-bg">
-
     <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('static/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
         :class="[isExpanded ? 'transform rotate-180' : '']"
       />
-     <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>
+      <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>
     </div>
     <div v-if="isExpanded">
       <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
-  <div class="w-1/2 min-w-[500px] mx-auto my-4">    <!-- bar holding top buttons -->
-
-    <div class="pl-4 float-left">                   <!-- view buttons container-->
-      <div class="toggle-container">
-        <label
-          :class="[
-            viewToggle === viewDomains
-              ? 'bg-yellow-400 text-black'
-              : 'disabled-state',
-            'button-style',
-          ]"
-          @click="toggleView(viewDomains)"
-        >
-          Domain View
-        </label>
-        <label
-          :class="[
-            viewToggle === viewWebsites
-              ? 'bg-blue-600 text-white'
-              : 'disabled-state',
-            'button-style',
-          ]"
-          @click="toggleView(viewWebsites)"
-        >
-          Website View
-        </label>
+      <!-- bar holding top buttons -->
+      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+        <!-- view buttons container-->
+        <div class="pl-4 float-left">
+          <div class="toggle-container">
+            <label
+              :class="[
+                viewToggle === viewDomains ? 'bg-yellow-400 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleView(viewDomains)"
+            >
+              Domain View
+            </label>
+            <label
+              :class="[
+                viewToggle === viewWebsites ? 'bg-blue-600 text-white' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleView(viewWebsites)"
+            >
+              Website View
+            </label>
+          </div>
+        </div>
+        <!-- mode buttons container -->
+        <div class="flex space-x-1 pr-4 justify-end">
+          <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
+          <div class="toggle-container">
+            <label
+              :class="[
+                modeToggle === modeStatic ? 'bg-orange-500 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleMode(modeStatic)"
+            >
+              Static
+            </label>
+            <label
+              :class="[
+                modeToggle === modeLive ? 'bg-green-500 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleMode(modeLive)"
+            >
+              Live
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="flex space-x-1 pr-4 justify-end">   <!-- mode buttons container -->
-      <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
-      <div class="toggle-container">
-        <label
-          :class="[
-            modeToggle === modeStatic
-              ? 'bg-orange-500 text-black'
-              : 'disabled-state',
-            'button-style',
-          ]"
-          @click="toggleMode(modeStatic)"
-        >
-          Static
-        </label>
-        <label
-          :class="[
-            modeToggle === modeLive
-              ? 'bg-green-500 text-black'
-              : 'disabled-state',
-            'button-style',
-          ]"
-          @click="toggleMode(modeLive)"
-        >
-          Live
-        </label>
+      <!-- graph container -->
+      <div
+        class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"
+      >
+        <v-network-graph
+          class="graph"
+          ref="graph"
+          :nodes="nodes"
+          :edges="edges"
+          :layouts="layouts"
+          :configs="configs"
+          :eventHandlers="eventHandlers"
+        />
       </div>
-    </div>
-  </div>
 
-  <div class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"> <!-- graph container -->
-    <v-network-graph class="graph"
-                     ref="graph"
-                     :nodes="nodes"
-                     :edges="edges"
-                     :layouts="layouts"
-                     :configs="configs"
-                     :eventHandlers="eventHandlers"
-    />
-  </div>
-
-  <div class="w-1/2 min-w-[500px] mx-auto my-4">   <!-- bar holding bottom buttons -->
-    <div class="flex space-x-1 pr-4 justify-center">    <!-- layout buttons container -->
-      <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
-      <div class="toggle-container">
-        <label
-          :class="[
-              layoutToggle === layoutLR
-                ? 'bg-[#0ff] text-black'
-                : 'disabled-state',
-              'button-style',
-            ]"
-          @click="toggleLayout(layoutLR)"
-        >
-          Left to Right
-        </label>
-        <label
-          :class="[
-              layoutToggle === layoutTB
-                ? 'bg-[#0ff] text-black'
-                : 'disabled-state',
-              'button-style',
-            ]"
-          @click="toggleLayout(layoutTB)"
-        >
-          Top to Bottom
-        </label>
+      <!-- bar holding bottom buttons -->
+      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+        <!-- layout buttons container -->
+        <div class="flex space-x-1 pr-4 justify-center">
+          <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
+          <div class="toggle-container">
+            <label
+              :class="[
+                layoutToggle === layoutLR ? 'bg-[#0ff] text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleLayout(layoutLR)"
+            >
+              Left to Right
+            </label>
+            <label
+              :class="[
+                layoutToggle === layoutTB ? 'bg-[#0ff] text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleLayout(layoutTB)"
+            >
+              Top to Bottom
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import * as vNG from "v-network-graph"
-import { computed, onMounted, reactive, ref, defineComponent } from "vue"
+import * as vNG from 'v-network-graph'
+import { computed, onMounted, reactive, ref, defineComponent } from 'vue'
 import { useWebsiteRecordStore } from '../stores/records'
 import { useRoute } from 'vue-router'
-import dagre from "@dagrejs/dagre"
+import dagre from '@dagrejs/dagre'
 
 defineComponent({
-  name: "VisualizationComponent",
+  name: 'VisualizationComponent'
 })
 
 const isExpanded = ref(false)
@@ -129,82 +123,81 @@ const route = useRoute()
 const store = useWebsiteRecordStore()
 
 onMounted(() => {
-  layout("LR")
+  layout('LR')
 })
 
 interface Node extends vNG.Node {
   name: string
   crawled: boolean
 }
-type NodePlaceHolder = [string, boolean];
+type NodePlaceHolder = [string, boolean]
 
 interface Edge extends vNG.Edge {
   color?: string
 }
-type EdgePlaceHolder = [string, string];
+type EdgePlaceHolder = [string, string]
 
 const nodes: Record<string, Node> = reactive({
-  node1: { name: "example.com", crawled: true },
-  node2: { name: "http://example.com/home", crawled: true },
-  node3: { name: "https://exam.com/info", crawled: true },
-  node4: { name: "https://www.exampl.com/about", crawled: false },
-  node5: { name: "example.com/contact", crawled: false },
+  node1: { name: 'example.com', crawled: true },
+  node2: { name: 'http://example.com/home', crawled: true },
+  node3: { name: 'https://exam.com/info', crawled: true },
+  node4: { name: 'https://www.exampl.com/about', crawled: false },
+  node5: { name: 'example.com/contact', crawled: false }
 })
 
 const edges: Record<string, Edge> = reactive({
-  edge1: { source: "node1", target: "node2", },
-  edge2: { source: "node1", target: "node3", },
-  edge3: { source: "node1", target: "node4", },
-  edge4: { source: "node3", target: "node5", },
-  edge5: { source: "node3", target: "node4", },
-  edge6: { source: "node4", target: "node3", },
+  edge1: { source: 'node1', target: 'node2' },
+  edge2: { source: 'node1', target: 'node3' },
+  edge3: { source: 'node1', target: 'node4' },
+  edge4: { source: 'node3', target: 'node5' },
+  edge5: { source: 'node3', target: 'node4' },
+  edge6: { source: 'node4', target: 'node3' }
 })
 
-const configs = reactive(vNG.defineConfigs<Node, Edge>({
+const configs = reactive(
+  vNG.defineConfigs<Node, Edge>({
     node: {
-      normal: { color: (node) => (node.crawled ? "#000" : "#999"), },
-      hover:  { color: (node) => (node.crawled ? "#000" : "#999"), },
-      label:  { visible: node => !!node.name,
-                color: (node) => (node.crawled ? "#000" : "#666"),
-      },
-      focusring: { visible: false, },
-      selectable: true,
+      normal: { color: (node) => (node.crawled ? '#000' : '#999') },
+      hover: { color: (node) => (node.crawled ? '#000' : '#999') },
+      label: { visible: (node) => !!node.name, color: (node) => (node.crawled ? '#000' : '#666') },
+      focusring: { visible: false },
+      selectable: true
     },
 
     edge: {
-      normal: { color: "#999", },
-      hover:  { color: "#999", },
+      normal: { color: '#999' },
+      hover: { color: '#999' },
       selectable: false,
       gap: 5,
       marker: {
         target: {
-          type: "arrow",
-          width:  4,
-          height: 4,
-        },
-      },
-    },
+          type: 'arrow',
+          width: 4,
+          height: 4
+        }
+      }
+    }
   })
 )
 
 const layouts: vNG.Layouts = reactive({
-  nodes: {},
+  nodes: {}
 })
 
 const eventHandlers: vNG.EventHandlers = {
-  "node:dblclick": ({ node, event }) => {
-    if (viewToggle.value !== viewWebsites)
-      return
+  'node:dblclick': ({ node, event }) => {
+    if (viewToggle.value !== viewWebsites) return
     //TODO
     if (nodes[node].crawled) {
       // send request to backend for it with URL in body?
       // then Node with the newest crawl time and list of all website record with this node will be returned
-      console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
+      console.log(
+        'open node detail: URL, Crawl Time, list of website record that crawled this node'
+      )
+    } else {
+      console.log('open node detail: URL')
     }
-    else {
-      console.log("open node detail: URL");
-    }
-  },
+  }
 }
 
 let websiteNodes: NodePlaceHolder[] = []
@@ -221,54 +214,49 @@ for (const [_, edge] of Object.entries(edges)) {
 domainNodes = convertWebsiteNodesToDomainNodes(websiteNodes)
 domainEdges = convertWebsiteEdgesToDomainEdges(websiteEdges)
 
-const modeStatic = "static"
-const modeLive = "live"
+const modeStatic = 'static'
+const modeLive = 'live'
 const modeToggle = ref(modeStatic)
 
-const layoutLR = "LR"
-const layoutTB = "TB"
+const layoutLR = 'LR'
+const layoutTB = 'TB'
 const layoutToggle = ref(layoutLR)
 
-const viewDomains = "domain"
-const viewWebsites = "website"
+const viewDomains = 'domain'
+const viewWebsites = 'website'
 const viewToggle = ref(viewWebsites)
 
 const nodeSize = 40
 
-function toggleMode(mode: "static" | "live") {
-  if (mode === modeToggle.value)
-    return
+function toggleMode(mode: 'static' | 'live') {
+  if (mode === modeToggle.value) return
   modeToggle.value = mode
   if (mode === modeStatic) {
     //TODO
   }
 }
 
-function toggleLayout(direction: "LR" | "TB"){
+function toggleLayout(direction: 'LR' | 'TB') {
   updateLayout(direction)
-  if (direction !== layoutToggle.value)
-    layoutToggle.value = direction
+  if (direction !== layoutToggle.value) layoutToggle.value = direction
 }
 
 function toggleView(viewType: 'domain' | 'website') {
-  if (viewType === viewToggle.value)
-    return
+  if (viewType === viewToggle.value) return
   viewToggle.value = viewType
-  if (viewType === 'domain')
-    changeView(domainNodes, domainEdges)
-  if (viewType === 'website')
-    changeView(websiteNodes, websiteEdges)
-  layout(layoutToggle.value === layoutLR ? "LR" : "TB")
+  if (viewType === 'domain') changeView(domainNodes, domainEdges)
+  if (viewType === 'website') changeView(websiteNodes, websiteEdges)
+  layout(layoutToggle.value === layoutLR ? 'LR' : 'TB')
 }
 
-function updateLayout(direction: "TB" | "LR") {
+function updateLayout(direction: 'TB' | 'LR') {
   // Animates the movement of an element.
   graph.value?.transitionWhile(() => {
     layout(direction)
   })
 }
 
-function layout(direction: "TB" | "LR") {
+function layout(direction: 'TB' | 'LR') {
   if (Object.keys(nodes).length <= 1 || Object.keys(edges).length == 0) {
     return
   }
@@ -281,7 +269,7 @@ function layout(direction: "TB" | "LR") {
     rankdir: direction,
     nodesep: nodeSize * 2,
     edgesep: nodeSize,
-    ranksep: nodeSize * 2,
+    ranksep: nodeSize * 2
   })
   // Default to assigning a new object as a label for each new edge.
   g.setDefaultEdgeLabel(() => ({}))
@@ -294,7 +282,7 @@ function layout(direction: "TB" | "LR") {
   })
 
   // Add edges to the graph.
-  Object.values(edges).forEach(edge => {
+  Object.values(edges).forEach((edge) => {
     g.setEdge(edge.source, edge.target)
   })
 
@@ -351,8 +339,8 @@ function convertWebsiteNodesToDomainNodes(websiteNodes: NodePlaceHolder[]): Node
 function convertWebsiteEdgesToDomainEdges(websiteEdges: EdgePlaceHolder[]): EdgePlaceHolder[] {
   const domainEdges: EdgePlaceHolder[] = []
   for (const [_, edge] of Object.entries(websiteEdges)) {
-    const sourceDomain = extractDomain(edge[0]) ?? ""
-    const targetDomain = extractDomain(edge[1]) ?? ""
+    const sourceDomain = extractDomain(edge[0]) ?? ''
+    const targetDomain = extractDomain(edge[1]) ?? ''
     if (sourceDomain !== targetDomain) {
       domainEdges.push([sourceDomain, targetDomain])
     }
@@ -362,12 +350,12 @@ function convertWebsiteEdgesToDomainEdges(websiteEdges: EdgePlaceHolder[]): Edge
 
 function extractDomain(url: string): string | null {
   try {
-    const matches = url.match(/^(https?:\/\/)?(www.)?([^/?#]+)(?:[/?#]|$)/i);
-    const domain = matches && matches[3];
-    return domain;
+    const matches = url.match(/^(https?:\/\/)?(www.)?([^/?#]+)(?:[/?#]|$)/i)
+    const domain = matches && matches[3]
+    return domain
   } catch (error) {
-    console.error('Invalid URL:', error);
-    return null;
+    console.error('Invalid URL:', error)
+    return null
   }
 }
 </script>

@@ -1,44 +1,99 @@
 <template>
   <div>
-    <div
-      :class="[
-      showForm ? 'block' : 'hidden',
-    ]">
-      <div class="fixed top-0 left-0 w-full h-full z-40 bg-[rgba(0,0,0,0.5)]" /> <!-- the veil -->
-      <div class="bg-dark-fg dark:bg-dark-bg border-2 border-dark-bg dark:border-dark-fg rounded-2xl py-4 px-8 z-50 fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-        <h1 v-if="formFields.creation" class="py-2 text-xl font-bold text-center mb-4"> Create New Record </h1> <!-- THIS IS NOT THE YELLOW BUTTON -->
-        <h1 v-else class="py-2 text-xl font-bold text-center mb-4"> Edit Record </h1>
+    <div :class="[showForm ? 'block' : 'hidden']">
+      <!-- the veil -->
+      <div class="fixed top-0 left-0 w-full h-full z-40 bg-[rgba(0,0,0,0.5)]" />
+      <div
+        class="bg-dark-fg dark:bg-dark-bg border-2 border-dark-bg dark:border-dark-fg rounded-2xl py-4 px-8 z-50 fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]"
+      >
+        <!-- THIS IS NOT THE YELLOW BUTTON -->
+        <h1 v-if="formFields.creation" class="py-2 text-xl font-bold text-center mb-4">
+          Create New Record
+        </h1>
+        <h1 v-else class="py-2 text-xl font-bold text-center mb-4">Edit Record</h1>
         <form @submit.prevent="handleSubmit" class="space-y-2">
           <div>
-            <label for="label" class="w-[100px] float-left" title="Name of your website record">Label:</label>
-            <input type="text" id="label" name="label" class="rounded text-black pl-1" v-model="formFields.label" />
+            <label for="label" class="w-[100px] float-left" title="Name of your website record"
+              >Label:</label
+            >
+            <input
+              type="text"
+              id="label"
+              name="label"
+              class="rounded text-black pl-1"
+              v-model="formFields.label"
+            />
           </div>
           <div>
             <label for="url" class="w-[100px] float-left" title="Starting URL">URL:</label>
-            <input type="text" id="url" name="url" class="rounded text-black pl-1" v-model="formFields.url" />
+            <input
+              type="text"
+              id="url"
+              name="url"
+              class="rounded text-black pl-1"
+              v-model="formFields.url"
+            />
           </div>
           <div>
-            <label for="regex" class="w-[100px] float-left" title="May restrict what pages should be crawled">RegEx:</label>
-            <input type="text" id="regex" name="regex" class="rounded text-black pl-1" v-model="formFields.regexp" />
+            <label
+              for="regex"
+              class="w-[100px] float-left"
+              title="May restrict what pages should be crawled"
+              >RegEx:</label
+            >
+            <input
+              type="text"
+              id="regex"
+              name="regex"
+              class="rounded text-black pl-1"
+              v-model="formFields.regexp"
+            />
           </div>
           <div>
-            <label for="tags" class="w-[100px] float-left" title="You can choose to add your own tags for the record">Tags:</label>
-            <input type="text" id="tags" name="tags" class="rounded text-black pl-1" v-model="formFields.tags" />
+            <label
+              for="tags"
+              class="w-[100px] float-left"
+              title="You can choose to add your own tags for the record"
+              >Tags:</label
+            >
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              class="rounded text-black pl-1"
+              v-model="formFields.tags"
+            />
           </div>
           <div>
-            <label for="periodicity" class="w-[100px] float-left" title="How often is record executed">Periodicity:</label>
-            <input type="number" id="periodicity" name="periodicity" min="0" class="rounded text-black pl-1 w-10" v-model="formFields.periodicity" /> /day
+            <label
+              for="periodicity"
+              class="w-[100px] float-left"
+              title="How often is record executed"
+              >Periodicity:</label
+            >
+            <input
+              type="number"
+              id="periodicity"
+              name="periodicity"
+              min="0"
+              class="rounded text-black pl-1 w-10"
+              v-model="formFields.periodicity"
+            />
+            /day
           </div>
-          <div class="flex space-x-1 pr-4">    <!-- layout buttons container -->
-            <label class="p-1 select-none cursor-default dark:text-dark-fg w-[94px]" title="Indicates, whether or not should the record be periodically executed. Can be changed later">Status:</label>
+          <!-- layout buttons container -->
+          <div class="flex space-x-1 pr-4">
+            <label
+              class="p-1 select-none cursor-default dark:text-dark-fg w-[94px]"
+              title="Indicates, whether or not should the record be periodically executed. Can be changed later"
+              >Status:</label
+            >
             <div class="toggle-container">
               <label
                 @click="formFields.status = true"
                 :class="[
-                  formFields.status
-                    ? 'bg-[#0f0] text-black'
-                    : 'disabled-state',
-                  'button-style',
+                  formFields.status ? 'bg-[#0f0] text-black' : 'disabled-state',
+                  'button-style'
                 ]"
               >
                 Active
@@ -46,10 +101,8 @@
               <label
                 @click="formFields.status = false"
                 :class="[
-                  !formFields.status
-                    ? 'bg-[#f00] text-black'
-                    : 'disabled-state',
-                  'button-style',
+                  !formFields.status ? 'bg-[#f00] text-black' : 'disabled-state',
+                  'button-style'
                 ]"
               >
                 Inactive
@@ -57,17 +110,29 @@
             </div>
           </div>
           <div class="flex justify-center space-x-4 mb-2 pt-4">
-            <button type="button"
+            <button
+              type="button"
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#f00] hover:bg-[#e00] font-bold"
-              @click="clearForm(); showForm = false"
+              @click="
+                clearForm();
+                showForm = false
+              "
             >
               Cancel
             </button>
-            <button v-if="formFields.creation" type="submit" class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#0f0] hover:bg-[#0d0] font-bold text-black">
+            <button
+              v-if="formFields.creation"
+              type="submit"
+              class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#0f0] hover:bg-[#0d0] font-bold text-black"
+            >
               Save
             </button>
 
-            <button v-else type="submit" class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#0cf] hover:bg-[#0bd] font-bold text-black">
+            <button
+              v-else
+              type="submit"
+              class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#0cf] hover:bg-[#0bd] font-bold text-black"
+            >
               Update
             </button>
           </div>
@@ -78,7 +143,10 @@
     <div class="flex items-center justify-center">
       <button
         class="px-4 py-2 select-none cursor-pointer border-2 border-dark-bg dark:border-dark-fg rounded bg-[#ff0] dark:bg-[#950] dark:hover:bg-[#a50] text-black dark:text-white dark:font-bold hover:bg-[#fd0] font-bold mx-auto mb-2"
-        @click="clearForm(); showForm = true"
+        @click="
+          clearForm();
+          showForm = true
+        "
       >
         <!-- THIS IS THE YELLOW BUTTON -->
         Create New Record
@@ -87,7 +155,9 @@
     <div class="flex flex-wrap justify-center">
       <div class="flex flex-wrap space-x-8">
         <div class="border-2 border-dark-bg dark:border-dark-fg rounded p-2 w-64 space-y-2">
-          <label for="filter" class="block text-gray-700 dark:text-white text-sm font-bold mb-2">Filter by:</label>
+          <label for="filter" class="block text-gray-700 dark:text-white text-sm font-bold mb-2"
+            >Filter by:</label
+          >
           <input
             id="filter"
             v-model="filter.label"
@@ -109,7 +179,9 @@
         </div>
 
         <div class="border-2 border-dark-bg dark:border-dark-fg rounded p-2 w-64">
-          <label for="sort" class="block text-gray-700 dark:text-white text-sm font-bold mb-2">Sort by:</label>
+          <label for="sort" class="block text-gray-700 dark:text-white text-sm font-bold mb-2"
+            >Sort by:</label
+          >
           <select
             id="sort"
             v-model="sort"
@@ -125,50 +197,83 @@
         </div>
       </div>
     </div>
-<!--    <hr class="border border-dark-bg dark:border-dark-fg z-0 mt-10" />-->
-<!--    <div class="flex justify-center space-x-4 mt-[-20px]">-->
-<!--      <div class="bg-white dark:bg-dark-bg">-->
-<!--        <button-->
-<!--          class="button-style border border-black rounded-lg mx-2"-->
-<!--          :class="[currentPage === 1 ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"-->
-<!--          @click="currentPage > 1 && currentPage&#45;&#45;"-->
-<!--        >-->
-<!--          Prev-->
-<!--        </button>-->
-<!--        <span class="py-1 dark:text-dark-fg">{{ currentPage }} / {{ totalPages }}</span>-->
-<!--        <button-->
-<!--          class="button-style border border-black rounded-lg mx-2"-->
-<!--          :class="[((currentPage === Math.ceil(records.length / pageSize)) || records.length == 0) ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"-->
-<!--          @click="currentPage < Math.ceil(records.length / pageSize) && currentPage++"-->
-<!--        >-->
-<!--          Next-->
-<!--        </button>-->
-<!--      </div>-->
-<!--    </div>-->
+    <!--    <hr class="border border-dark-bg dark:border-dark-fg z-0 mt-10" />-->
+    <!--    <div class="flex justify-center space-x-4 mt-[-20px]">-->
+    <!--      <div class="bg-white dark:bg-dark-bg">-->
+    <!--        <button-->
+    <!--          class="button-style border border-black rounded-lg mx-2"-->
+    <!--          :class="[currentPage === 1 ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"-->
+    <!--          @click="currentPage > 1 && currentPage&#45;&#45;"-->
+    <!--        >-->
+    <!--          Prev-->
+    <!--        </button>-->
+    <!--        <span class="py-1 dark:text-dark-fg">{{ currentPage }} / {{ totalPages }}</span>-->
+    <!--        <button-->
+    <!--          class="button-style border border-black rounded-lg mx-2"-->
+    <!--          :class="[((currentPage === Math.ceil(records.length / pageSize)) || records.length == 0) ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"-->
+    <!--          @click="currentPage < Math.ceil(records.length / pageSize) && currentPage++"-->
+    <!--        >-->
+    <!--          Next-->
+    <!--        </button>-->
+    <!--      </div>-->
+    <!--    </div>-->
 
     <div class="flex flex-wrap justify-center">
       <div v-for="record in paginatedRecords" :key="record.id" class="flex justify-center px-4">
-        <div class="px-4 pb-4 bg-white dark:bg-dark-bg dark:text-dark-fg border-2 border-dark-bg dark:border-dark-fg rounded shadow my-4">
+        <div
+          class="px-4 pb-4 bg-white dark:bg-dark-bg dark:text-dark-fg border-2 border-dark-bg dark:border-dark-fg rounded shadow my-4"
+        >
           <h2 class="py-1 text-xl font-bold text-center my-2">{{ record.label }}</h2>
           <div class="flex justify-center space-x-4 mb-2">
             <button
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-orange-500 text-black dark:bg-[#a30] dark:text-white dark:font-bold dark:hover:bg-[#e70] hover:bg-[#fd9a66]"
-              @click="formFields.creation = false; formFields.label = record.label; formFields.url = record.url; formFields.regexp = record.regexp; formFields.tags = record.tags.join(', '); formFields.periodicity = record.periodicity; formFields.status = record.isActive; showForm = true"
-            >Edit</button>
-            <button class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-green-400 dark:bg-[#161] dark:hover:bg-[#1a1] text-black dark:text-white dark:font-bold hover:bg-green-300">Add to Graph</button>
-            <button class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#d4f] dark:bg-[#51a] dark:hover:bg-[#72e] dark:text-white dark:font-bold hover:bg-[#e6f]">Crawl</button>
+              @click="
+                formFields.creation = false;
+                formFields.label = record.label;
+                formFields.url = record.url;
+                formFields.regexp = record.regexp;
+                formFields.tags = record.tags.join(', ');
+                formFields.periodicity = record.periodicity;
+                formFields.status = record.isActive;
+                showForm = true
+              "
+            >
+              Edit
+            </button>
+            <button
+              class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-green-400 dark:bg-[#161] dark:hover:bg-[#1a1] text-black dark:text-white dark:font-bold hover:bg-green-300"
+            >
+              Add to Graph
+            </button>
+            <button
+              class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#d4f] dark:bg-[#51a] dark:hover:bg-[#72e] dark:text-white dark:font-bold hover:bg-[#e6f]"
+            >
+              Crawl
+            </button>
           </div>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>URL:</strong> {{ record.url }}</p>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>RegExp:</strong> {{ record.regexp }}</p>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>Tags:</strong> {{ record.tags.join(', ') }}</p>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>Periodicity:</strong> {{ record.periodicity }} a day</p>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong >Last Execution Time:</strong> {{ record.lastExecutionTime }}</p>
-          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg"><strong>Last Execution Status:</strong> {{ record.lastExecutionStatus }}</p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>URL:</strong> {{ record.url }}
+          </p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>RegExp:</strong> {{ record.regexp }}
+          </p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>Tags:</strong> {{ record.tags.join(', ') }}
+          </p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>Periodicity:</strong> {{ record.periodicity }} a day
+          </p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>Last Execution Time:</strong> {{ record.lastExecutionTime }}
+          </p>
+          <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
+            <strong>Last Execution Status:</strong> {{ record.lastExecutionStatus }}
+          </p>
           <div class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
             <div class="flex space-x-1 pr-4">
               <strong class="dark:text-dark-fg">Status:</strong>
               <div @click="activateRecord(record.id, !record.isActive)">
-                <a class="cursor-pointer">{{ record.isActive ? 'active' : 'inactive'}}</a>
+                <a class="cursor-pointer">{{ record.isActive ? 'active' : 'inactive' }}</a>
               </div>
               <button
                 class="flex justify-center content-center align-middle w-4 h-4 border-none rounded-[50%] bg-white dark:bg-dark-bg mt-[6px] overflow-auto"
@@ -176,7 +281,7 @@
               >
                 <span
                   class="rounded-full m-auto"
-                  :class="[record.isActive ? 'shadow-green-light' : 'shadow-red-light',]"
+                  :class="[record.isActive ? 'shadow-green-light' : 'shadow-red-light']"
                 />
               </button>
             </div>
@@ -199,7 +304,11 @@
       <div class="bg-white dark:bg-dark-bg">
         <button
           class="button-style border border-black rounded-lg mx-2"
-          :class="[currentPage === 1 ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"
+          :class="[
+            currentPage === 1
+              ? 'disabled-state cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-700 text-white font-bold'
+          ]"
           @click="currentPage > 1 && currentPage--"
         >
           Prev
@@ -207,7 +316,11 @@
         <span class="py-1 dark:text-dark-fg">{{ currentPage }} / {{ totalPages }}</span>
         <button
           class="button-style border border-black rounded-lg mx-2"
-          :class="[((currentPage === Math.ceil(records.length / pageSize)) || records.length == 0) ? 'disabled-state cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700 text-white font-bold']"
+          :class="[
+            currentPage === Math.ceil(records.length / pageSize) || records.length == 0
+              ? 'disabled-state cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-700 text-white font-bold'
+          ]"
           @click="currentPage < Math.ceil(records.length / pageSize) && currentPage++"
         >
           Next
@@ -228,7 +341,7 @@ const formFields = reactive({
   regexp: '',
   tags: '',
   periodicity: 0,
-  status: true,
+  status: true
 })
 
 function clearForm() {
@@ -243,7 +356,7 @@ function clearForm() {
 
 const handleSubmit = () => {
   // Handle form submission
-};
+}
 
 const store = useWebsiteRecordStore()
 const currentPage = ref(1)
@@ -256,9 +369,9 @@ const fetchRecords = async () => {
 }
 
 async function activateRecord(id: number, isActive: boolean) {
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  if (!records.find(record => record.id === id)) return
-  records.find(record => record.id === id)!.isActive = isActive
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  if (!records.find((record) => record.id === id)) return
+  records.find((record) => record.id === id)!.isActive = isActive
 }
 
 //onMounted(fetchRecords)
@@ -274,7 +387,7 @@ const records = reactive([
     periodicity: 1,
     lastExecutionTime: '2021-10-02T13:00:00Z',
     lastExecutionStatus: 'unknown',
-    isActive: true,
+    isActive: true
   },
   {
     id: 2,
@@ -285,7 +398,7 @@ const records = reactive([
     periodicity: 24,
     lastExecutionTime: '2021-10-02T13:00:00Z',
     lastExecutionStatus: 'unknown',
-    isActive: true,
+    isActive: true
   },
   {
     id: 3,
@@ -296,7 +409,7 @@ const records = reactive([
     periodicity: 12,
     lastExecutionTime: '2021-10-02T13:00:00Z',
     lastExecutionStatus: 'unknown',
-    isActive: true,
+    isActive: true
   },
   {
     id: 4,
@@ -307,7 +420,7 @@ const records = reactive([
     periodicity: 1,
     lastExecutionTime: '2021-10-02T13:00:00Z',
     lastExecutionStatus: 'unknown',
-    isActive: true,
+    isActive: true
   },
   {
     id: 5,
@@ -318,7 +431,7 @@ const records = reactive([
     periodicity: 48,
     lastExecutionTime: '2021-10-02T13:50:20Z',
     lastExecutionStatus: 'success',
-    isActive: false,
+    isActive: false
   }
   // TODO: communication with server
 ])
@@ -327,17 +440,23 @@ const showForm = ref(false)
 
 async function deleteRecord(id: number) {
   await store.deleteRecord(id.toString())
-  records.splice(records.findIndex(record => record.id === id), 1)
+  records.splice(
+    records.findIndex((record) => record.id === id),
+    1
+  )
 }
 
 const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
 
 const filteredRecords = computed(() => {
-  return records.filter(record => {
-    const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true;
-    const labelFilter = filter.value.label ? record.label.includes(filter.value.label) : true;
-    const tagsFilter = filter.value.tags.length > 0 ? record.tags.some(tag => filter.value.tags.includes(tag)) : true;
-    return urlFilter && labelFilter && tagsFilter;
+  return records.filter((record) => {
+    const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true
+    const labelFilter = filter.value.label ? record.label.includes(filter.value.label) : true
+    const tagsFilter =
+      filter.value.tags.length > 0
+        ? record.tags.some((tag) => filter.value.tags.includes(tag))
+        : true
+    return urlFilter && labelFilter && tagsFilter
   })
 })
 
