@@ -7,11 +7,17 @@ export default {
   darkMode: 'selector',
   theme: {
     extend: {
+      screens: {
+        'max-xl': { 'max': '1280px' },
+        'max-sm': { 'max': '640px' },
+      },
       colors: {
         'sun-yellow': '#F7F700',
         'moon-blue': '#D9DCEB',
-        'dark-bg': '#0A1124',
-        'dark-fg': '#D9DCEB',
+        // 'dark-fg': '#D9DCEB',
+        // 'dark-bg': '#0A1124',
+        'dark-bg': '#000',
+        'dark-fg': '#fff',
         'light-bg': '#F9FAFB',
       },
       boxShadow: {

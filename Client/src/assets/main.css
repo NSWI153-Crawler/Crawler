@@ -13,4 +13,8 @@
   @apply flex border border-black dark:border-gray-700 rounded-lg overflow-hidden;
 }
 
+.border-lines {
+  @apply relative bg-white mt-[-20px] float-left;
+}
+
 @tailwind utilities;
