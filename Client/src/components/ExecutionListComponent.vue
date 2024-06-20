@@ -1,6 +1,14 @@
 <template>
-  <div class="execution-list" ref="executionList">
-    <h1 class="pb-2 mb-2 text-3xl text-center border-b border-b-dark-bg dark:border-b-dark-fg dark:text-dark-fg">Executions Log</h1>
+  <div class="execution-list bg-white dark:bg-dark-bg" ref="executionList">
+    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
+      <button
+        class="absolute right-8 mt-[9px] bg-[url('static/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
+        :class="[isExpanded ? 'transform rotate-180' : '']"
+      />
+      <h1 class="text-2xl text-center dark:text-dark-fg">Executions Log</h1>
+    </div>
+    <div v-if="isExpanded">
+      <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
     <div id="dropdown" class="w-64 relative mx-auto my-4">
 
       <div @click="showCheckboxes" class="cursor-pointer relative">
@@ -67,7 +75,7 @@
           <td class="border border-dark-bg dark:border-dark-fg px-2 py-2 text-center">{{ execution.numberOfSitesCrawled }}</td>
           <td
             class="border border-dark-bg px-2 py-2 text-center text-dark-bg dark:border-dark-fg"
-            :class="execution.status === 'success' ? 'bg-green-400 dark:bg-[#14e414]' : 'bg-[#ff0000]'"
+            :class="execution.status === 'success' ? 'bg-green-400 dark:bg-[#14e414]' : 'bg-[#ff0000] dark:bg-[#900] dark:text-dark-fg dark:font-bold'"
           >{{ execution.status }}</td>
         </tr>
         </tbody>
@@ -89,6 +97,7 @@
       > Next
       </button>
     </div>
+    </div>
   </div>
 </template>
 
@@ -97,6 +106,8 @@ import { watch, onMounted, onUnmounted, computed, ref, defineComponent } from "v
 defineComponent({
   name: "ExecutionListComponent",
 })
+
+const isExpanded = ref(false);
 
 const executions = ref([
   {

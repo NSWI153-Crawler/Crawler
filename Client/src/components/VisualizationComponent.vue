@@ -1,7 +1,15 @@
 <template>
-  <div class="dark:bg-dark-bg">
+  <div class="bg-white dark:bg-dark-bg">
 
-  <h1 class="pb-2 mb-2 text-3xl text-center border-b border-b-dark-bg dark:border-b-dark-fg dark:text-dark-fg">Graph</h1>
+    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
+      <button
+        class="absolute right-8 mt-[9px] bg-[url('static/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
+        :class="[isExpanded ? 'transform rotate-180' : '']"
+      />
+     <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>
+    </div>
+    <div v-if="isExpanded">
+      <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
   <div class="w-1/2 min-w-[500px] mx-auto my-4">    <!-- bar holding top buttons -->
 
     <div class="pl-4 float-left">                   <!-- view buttons container-->
@@ -100,6 +108,7 @@
       </div>
     </div>
   </div>
+    </div>
   </div>
 </template>
 
@@ -114,6 +123,7 @@ defineComponent({
   name: "VisualizationComponent",
 })
 
+const isExpanded = ref(false)
 const graph = ref<vNG.VNetworkGraphInstance>()
 const route = useRoute()
 const store = useWebsiteRecordStore()
@@ -181,14 +191,14 @@ const layouts: vNG.Layouts = reactive({
   nodes: {},
 })
 
-
-
-
 const eventHandlers: vNG.EventHandlers = {
   "node:dblclick": ({ node, event }) => {
     if (viewToggle.value !== viewWebsites)
       return
+    //TODO
     if (nodes[node].crawled) {
+      // send request to backend for it with URL in body?
+      // then Node with the newest crawl time and list of all website record with this node will be returned
       console.log("open node detail: URL, Crawl Time, list of website record that crawled this node");
     }
     else {
