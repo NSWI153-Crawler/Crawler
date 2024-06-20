@@ -14,14 +14,15 @@ function toggleDarkMode(darkMode: boolean) {
     document.documentElement.classList.remove('dark')
   }
 }
-//  bg-[#A5F700] dark:bg-[#174400]
 </script>
 
 <template>
+  <head>
+    <meta name="viewport" content="width=540, initial-scale=1" />
+  </head>
   <header
-    :style="{ backgroundImage: isDarkMode ? 'url(/static/banner.jpg)' : 'url(/static/banner-light.jpg)' }"
-
-    class="text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg min-w-[660px]">
+    :style="{ backgroundImage: isDarkMode ? 'url(/static/banner-dark.svg)' : 'url(/static/banner-light.svg)' }"
+    class="dark:bg-dark-bg bg-dark-fg text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg">
     <div>
       <h1 class="text-[#0A1124] dark:text-[#fff]">
         Web Crawler</h1>
@@ -31,7 +32,7 @@ function toggleDarkMode(darkMode: boolean) {
         <button
           :class="[
           isDarkMode === false
-              ? 'bg-[#fff] shadow-sun-glow'
+              ? 'bg-[#ff0]'
               : 'disabled-state',
             'px-3 py-1 select-none cursor-pointer rounded-t',
           ]"
