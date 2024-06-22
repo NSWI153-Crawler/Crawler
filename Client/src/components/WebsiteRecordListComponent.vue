@@ -434,6 +434,21 @@ async function deleteRecord(id: number) {
 
 const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
 
+function sortRecords() {
+  records.sort((a, b) => {
+    if (sort.value === 'url') {
+      return a.url.localeCompare(b.url)
+    } else if (sort.value === 'label') {
+      return a.label.localeCompare(b.label)
+    } else if (sort.value === 'periodicity') {
+      return a.periodicity - b.periodicity
+    } else if (sort.value === 'lastCrawled') {
+      return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
+    }
+    return 0
+  })
+}
+
 const filteredRecords = computed(() => {
   return records.filter((record) => {
     const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true
@@ -451,4 +466,6 @@ const paginatedRecords = computed(() => {
   const end = start + pageSize.value
   return filteredRecords.value.slice(start, end)
 })
+
+watch(() => sort.value, sortRecords);
 </script>
