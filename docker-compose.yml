@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   db:
@@ -20,13 +20,11 @@ services:
       retries: 10
     restart: always
     networks:
-      - mynetwork
+      - network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: pma
-    links:
-      - db
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
@@ -35,14 +33,15 @@ services:
     ports:
       - "8081:80"
     networks:
-      - mynetwork
+      - network
     depends_on:
       - db
 
   backend:
     build: ./Backend/
     ports:
-      - "3600:80"
+      - "3600:8080"
+      - "5077:5077"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "server=db;database=crawler;user=testUser;password=testPassword"
@@ -54,8 +53,8 @@ services:
       interval: 10s
       retries: 10
     networks:
-      - mynetwork
-  
+      - network
+
   migration:
     build:
       dockerfile: ./Infrastructure/Dockerfile
@@ -64,15 +63,13 @@ services:
       db:
         condition: service_healthy
     environment:
-      MYSQL_HOST: db 
+      MYSQL_HOST: db
       MYSQL_DATABASE: crawler
       MYSQL_USER: testUser
       MYSQL_PASSWORD: testPassword
     networks:
-      - mynetwork
-    entrypoint: 
-      "dotnet ef database update --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj --context Infrastructure.Persistence.Contexts.CrawlerDbContext"
-
+      - network
+    entrypoint: "dotnet ef database update --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj --context Infrastructure.Persistence.Contexts.CrawlerDbContext"
 
   frontend:
     build: ./Client/
@@ -81,11 +78,11 @@ services:
     depends_on:
       - backend
     networks:
-      - mynetwork
+      - network
 
 volumes:
   mysqlData:
 
 networks:
-  mynetwork:
+  network:
     driver: bridge
