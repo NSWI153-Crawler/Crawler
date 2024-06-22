@@ -21,6 +21,8 @@ export default {
         'light-bg': '#F9FAFB',
       },
       boxShadow: {
+        'dark-glow': '0 0 40px 10px #333',
+        'light-glow': '0 0 40px 10px #ccc',
         'sun-glow': '0 0 60px 10px #f7f766',
         'moon-glow': '0 0 60px 20px #D9DCEB',
         'green-light': '0 0 10px 4px #00FF00, 0 0 3px 3px #00FF00',

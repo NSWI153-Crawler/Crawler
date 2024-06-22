@@ -6,7 +6,7 @@
     :style="{
       backgroundImage: isDarkMode ? 'url(/static/banner-dark.svg)' : 'url(/static/banner-light.svg)'
     }"
-    class="dark:bg-dark-bg bg-dark-fg text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg"
+    class="shadow-dark-glow dark:shadow-light-glow dark:bg-dark-bg bg-dark-fg text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg w-full"
   >
     <div>
       <h1 class="text-[#0A1124] dark:text-[#fff]">Web Crawler</h1>
@@ -54,11 +54,11 @@
       </div>
     </div>
   </header>
-
-  <RouterView />
-
+  <main class="min-h-[90vh]">
+    <RouterView />
+  </main>
   <footer
-    class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg min-w-[660px]"
+    class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg"
   >
     <p>© 2024 Web Crawler</p>
   </footer>
