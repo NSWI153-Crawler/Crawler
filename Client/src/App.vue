@@ -4,7 +4,7 @@
   </head>
   <header
     :style="{
-      backgroundImage: isDarkMode ? 'url(/static/banner-dark.svg)' : 'url(/static/banner-light.svg)'
+      backgroundImage: isDarkMode ? 'url(./banner-dark.svg)' : 'url(./banner-light.svg)'
     }"
     class="shadow-dark-glow dark:shadow-light-glow dark:bg-dark-bg bg-dark-fg text-5xl font-bold text-center px-6 py-12 bg-center bg-cover bg-no-repeat relative border-b-2 border-dark-bg dark:border-dark-fg w-full"
   >

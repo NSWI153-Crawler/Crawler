@@ -2,7 +2,7 @@
   <div class="bg-white dark:bg-dark-bg">
     <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
-        class="absolute right-8 mt-[9px] bg-[url('static/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
+        class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
         :class="[isExpanded ? 'transform rotate-180' : '']"
       />
       <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>

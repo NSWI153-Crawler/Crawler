@@ -2,7 +2,7 @@
   <div class="execution-list bg-white dark:bg-dark-bg" ref="executionList">
     <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
-        class="absolute right-8 mt-[9px] bg-[url('static/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
+        class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
         :class="[isExpanded ? 'transform rotate-180' : '']"
       />
       <h1 class="text-2xl text-center dark:text-dark-fg">Executions Log</h1>
@@ -173,6 +173,7 @@ const sortColumn = ref('time')
 const sortOrder = ref('desc')
 
 const uniqueExecutions = computed(() => {
+  // used for filtering
   const uniqueLabels = new Set()
   return executions.value.filter((execution) => {
     if (!uniqueLabels.has(execution.label)) {
