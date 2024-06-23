@@ -110,7 +110,6 @@
 import * as vNG from 'v-network-graph'
 import { computed, onMounted, reactive, ref, defineComponent } from 'vue'
 import { useWebsiteRecordStore } from '../stores/records'
-import { useRoute } from 'vue-router'
 import dagre from '@dagrejs/dagre'
 
 defineComponent({
@@ -119,7 +118,6 @@ defineComponent({
 
 const isExpanded = ref(false)
 const graph = ref<vNG.VNetworkGraphInstance>()
-const route = useRoute()
 const store = useWebsiteRecordStore()
 
 onMounted(() => {

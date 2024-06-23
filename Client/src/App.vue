@@ -1,5 +1,6 @@
 <template>
   <head>
+    <title>Web Crawler</title>
     <meta name="viewport" content="width=540, initial-scale=1" />
   </head>
   <header
@@ -35,7 +36,7 @@
         </button>
         <button
           :class="[
-            isDarkMode === true
+            isDarkMode
               ? 'bg-[#01cdf4] shadow-moon-glow text-[#fff]'
               : 'bg-gray-700 text-gray-400',
             'px-3 py-1 select-none cursor-pointer rounded-b'
@@ -55,18 +56,18 @@
     </div>
   </header>
   <main class="min-h-[90vh]">
-    <RouterView />
+    <HomeView />
   </main>
   <footer
-    class="text-center py-4 bg-dark-bg text-black text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg"
+    class="text-center py-4 bg-dark-bg text-dark-fg border-t-2 border-dark-bg dark:border-dark-fg"
   >
     <p>© 2024 Web Crawler</p>
   </footer>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import HomeView from '@/views/HomeView.vue'
 
 const isDarkMode = ref(false)
 function toggleDarkMode(darkMode: boolean) {
