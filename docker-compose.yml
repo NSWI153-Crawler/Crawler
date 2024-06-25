@@ -19,8 +19,6 @@ services:
       interval: 10s
       retries: 10
     restart: always
-    networks:
-      - network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -31,20 +29,23 @@ services:
       PMA_ARBITRARY: 1
     restart: always
     ports:
-      - "8081:80"
-    networks:
-      - network
+      - "8082:80"
     depends_on:
       - db
 
   backend:
     build: ./Backend/
     ports:
-      - "3600:8080"
+      - "8080:8080"
+      - "8081:8081"
       - "5077:5077"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "server=db;database=crawler;user=testUser;password=testPassword"
+      MYSQL_HOST: db
+      MYSQL_DATABASE: crawler
+      MYSQL_USER: testUser
+      MYSQL_PASSWORD: testPassword
     depends_on:
       db:
         condition: service_healthy
@@ -52,8 +53,7 @@ services:
       test: ["CMD-SHELL", "nc -z db 3306"]
       interval: 10s
       retries: 10
-    networks:
-      - network
+    
 
   migration:
     build:
@@ -67,22 +67,17 @@ services:
       MYSQL_DATABASE: crawler
       MYSQL_USER: testUser
       MYSQL_PASSWORD: testPassword
-    networks:
-      - network
+    
     entrypoint: "dotnet ef database update --project Infrastructure/Infrastructure.csproj --startup-project Api/Api.csproj --context Infrastructure.Persistence.Contexts.CrawlerDbContext"
 
   frontend:
     build: ./Client/
     ports:
-      - "8080:80"
+      - "8083:80"
     depends_on:
       - backend
-    networks:
-      - network
+    
 
 volumes:
   mysqlData:
 
-networks:
-  network:
-    driver: bridge
