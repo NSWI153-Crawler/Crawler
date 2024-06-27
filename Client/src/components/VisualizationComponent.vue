@@ -127,7 +127,7 @@ const eventHandlers: vNG.EventHandlers = {
 const tooltip = ref<HTMLDivElement>()
 const targetNodeId = ref<string>('')
 const tooltipOpacity = ref<number>(0)
-const tooltipPos = ref({ left: 'px', top: '0px' })
+const tooltipPos = ref({ left: '0px', top: '0px' })
 
 const targetNodePos = computed(() => {
   const nodePos = layouts.nodes[targetNodeId.value]
@@ -345,7 +345,7 @@ watch(
         <!-- view buttons container-->
         <div class="pl-4 float-left">
           <div class="toggle-container">
-            <label
+            <button
               :class="[
                 viewToggle === viewDomains ? 'bg-yellow-400 text-black' : 'disabled-state',
                 'button-style'
@@ -353,8 +353,8 @@ watch(
               @click="toggleView(viewDomains)"
             >
               Domain View
-            </label>
-            <label
+            </button>
+            <button
               :class="[
                 viewToggle === viewWebsites ? 'bg-blue-600 text-white' : 'disabled-state',
                 'button-style'
@@ -362,14 +362,14 @@ watch(
               @click="toggleView(viewWebsites)"
             >
               Website View
-            </label>
+            </button>
           </div>
         </div>
         <!-- mode buttons container -->
         <div class="flex space-x-1 pr-4 justify-end">
           <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
           <div class="toggle-container">
-            <label
+            <button
               :class="[
                 modeToggle === modeStatic ? 'bg-orange-500 text-black' : 'disabled-state',
                 'button-style'
@@ -377,8 +377,8 @@ watch(
               @click="toggleMode(modeStatic)"
             >
               Static
-            </label>
-            <label
+            </button>
+            <button
               :class="[
                 modeToggle === modeLive ? 'bg-green-500 text-black' : 'disabled-state',
                 'button-style'
@@ -386,7 +386,7 @@ watch(
               @click="toggleMode(modeLive)"
             >
               Live
-            </label>
+            </button>
           </div>
         </div>
       </div>
@@ -414,7 +414,9 @@ watch(
             <p><b>Title:</b> {{ nodes[targetNodeId]?.title ?? '' }}</p>
             <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? '' }}</p>
             <p><b>Crawled at:</b> {{ nodes[targetNodeId]?.crawledTime ?? 'unknown' }}</p>
-            <p title="Click on website record to start new execution"><b>Crawled by:</b> ⓘ</p>
+            <p class="cursor-default" title="Click on website record to start new execution">
+              <b>Crawled by:</b> ⓘ
+            </p>
             <ul class="list-disc list-inside">
               <!--              TODO crawl records on click; find record id by name in store?-->
               <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record">
@@ -427,7 +429,7 @@ watch(
             <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? '' }}</p>
             <div class="flex justify-center my-1">
               <button
-                class="p-1 mx-auto select-none cursor-pointer border-2 border-dark-bg bg-green-500 rounded"
+                class="my-1 p-1 mx-auto select-none cursor-pointer border-2 border-dark-bg bg-green-500 hover:bg-green-400 rounded"
                 @click="showCreateForm(nodes[targetNodeId]?.name)"
               >
                 Create Website Record
@@ -443,7 +445,7 @@ watch(
         <div class="flex space-x-1 pr-4 justify-center">
           <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
           <div class="toggle-container">
-            <label
+            <button
               :class="[
                 layoutToggle === layoutLR ? 'bg-[#0ff] text-black' : 'disabled-state',
                 'button-style'
@@ -451,8 +453,8 @@ watch(
               @click="toggleLayout(layoutLR)"
             >
               Left to Right
-            </label>
-            <label
+            </button>
+            <button
               :class="[
                 layoutToggle === layoutTB ? 'bg-[#0ff] text-black' : 'disabled-state',
                 'button-style'
@@ -460,7 +462,7 @@ watch(
               @click="toggleLayout(layoutTB)"
             >
               Top to Bottom
-            </label>
+            </button>
           </div>
         </div>
       </div>
