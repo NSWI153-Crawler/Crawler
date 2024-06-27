@@ -1,3 +1,21 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import HomeView from '@/views/HomeView.vue'
+
+const isDarkMode = ref(false)
+function toggleDarkMode(darkMode: boolean) {
+  if (darkMode === isDarkMode.value) {
+    return
+  }
+  isDarkMode.value = darkMode
+  if (darkMode) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+</script>
+
 <template>
   <head>
     <title>Web Crawler</title>
@@ -16,7 +34,7 @@
       <div class="flex flex-col border-2 border-gray-700 dark:border-dark-bg rounded-lg">
         <button
           :class="[
-            isDarkMode === false ? 'bg-[#ff0]' : 'disabled-state',
+            !isDarkMode ? 'bg-[#ff0]' : 'disabled-state',
             'px-3 py-1 select-none cursor-pointer rounded-t'
           ]"
           @click="toggleDarkMode(false)"
@@ -36,9 +54,7 @@
         </button>
         <button
           :class="[
-            isDarkMode
-              ? 'bg-[#01cdf4] shadow-moon-glow text-[#fff]'
-              : 'bg-gray-700 text-gray-400',
+            isDarkMode ? 'bg-[#01cdf4] shadow-moon-glow text-[#fff]' : 'bg-gray-700 text-gray-400',
             'px-3 py-1 select-none cursor-pointer rounded-b'
           ]"
           @click="toggleDarkMode(true)"
@@ -64,21 +80,3 @@
     <p>© 2024 Web Crawler</p>
   </footer>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-import HomeView from '@/views/HomeView.vue'
-
-const isDarkMode = ref(false)
-function toggleDarkMode(darkMode: boolean) {
-  if (darkMode === isDarkMode.value) {
-    return
-  }
-  isDarkMode.value = darkMode
-  if (darkMode) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-</script>

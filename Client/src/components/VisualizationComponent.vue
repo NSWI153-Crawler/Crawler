@@ -1,144 +1,15 @@
-<template>
-  <div class="bg-white dark:bg-dark-bg">
-    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
-      <button
-        class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
-        :class="[isExpanded ? 'transform rotate-180' : '']"
-      />
-      <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>
-    </div>
-    <div v-if="isExpanded">
-      <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
-      <!-- bar holding top buttons -->
-      <div class="w-1/2 min-w-[500px] mx-auto my-4">
-        <!-- view buttons container-->
-        <div class="pl-4 float-left">
-          <div class="toggle-container">
-            <label
-              :class="[
-                viewToggle === viewDomains ? 'bg-yellow-400 text-black' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleView(viewDomains)"
-            >
-              Domain View
-            </label>
-            <label
-              :class="[
-                viewToggle === viewWebsites ? 'bg-blue-600 text-white' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleView(viewWebsites)"
-            >
-              Website View
-            </label>
-          </div>
-        </div>
-        <!-- mode buttons container -->
-        <div class="flex space-x-1 pr-4 justify-end">
-          <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
-          <div class="toggle-container">
-            <label
-              :class="[
-                modeToggle === modeStatic ? 'bg-orange-500 text-black' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleMode(modeStatic)"
-            >
-              Static
-            </label>
-            <label
-              :class="[
-                modeToggle === modeLive ? 'bg-green-500 text-black' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleMode(modeLive)"
-            >
-              Live
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- graph container -->
-      <div
-        class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"
-      >
-        <v-network-graph
-          class="graph"
-          ref="graph"
-          :nodes="nodes"
-          :edges="edges"
-          :layouts="layouts"
-          :configs="configs"
-          :eventHandlers="eventHandlers"
-        />
-        <div
-          ref="tooltip"
-          class="t-0 l-0 opacity-0 absolute p-2 grid place-content-center text-xs bg-gray-200 border border-dark-bg rounded-xl shadow"
-          :class="{ 'pointer-events-none': tooltipOpacity === 0 }"
-          :style="{ ...tooltipPos, opacity: tooltipOpacity }"
-        >
-          <div v-if="nodes[targetNodeId]?.crawled">
-            <p><b>Title:</b> {{ nodes[targetNodeId]?.title ?? "" }}</p>
-            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? "" }}</p>
-            <p><b>Crawled at:</b> {{ nodes[targetNodeId]?.crawledTime ?? "unknown" }}</p>
-            <p title="Click on website record to start new execution"><b>Crawled by:</b>    ⓘ</p>
-            <ul class="list-disc list-inside">
-<!--              TODO crawl records on click; find record id by name in store?-->
-              <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record">{{ record }}</li>
-            </ul>
-          </div>
-          <div v-else>
-            <i>Not crawled due to boundary RegExp</i>
-            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? "" }}</p>
-            <div class="flex justify-center my-1">
-              <button
-                class="p-1 mx-auto select-none cursor-pointer border-2 border-dark-bg bg-green-500 rounded"
-                @click="showCreateForm(nodes[targetNodeId]?.name)"
-              >
-                Create Website Record
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- bar holding bottom buttons -->
-      <div class="w-1/2 min-w-[500px] mx-auto my-4">
-        <!-- layout buttons container -->
-        <div class="flex space-x-1 pr-4 justify-center">
-          <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
-          <div class="toggle-container">
-            <label
-              :class="[
-                layoutToggle === layoutLR ? 'bg-[#0ff] text-black' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleLayout(layoutLR)"
-            >
-              Left to Right
-            </label>
-            <label
-              :class="[
-                layoutToggle === layoutTB ? 'bg-[#0ff] text-black' : 'disabled-state',
-                'button-style'
-              ]"
-              @click="toggleLayout(layoutTB)"
-            >
-              Top to Bottom
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <WebsiteRecordFormComponent ref="formComponent" />
-  </div>
-</template>
-
 <script setup lang="ts">
 import * as vNG from 'v-network-graph'
-import { computed, nextTick, watch, onMounted, onUnmounted, reactive, ref, defineComponent } from 'vue'
+import {
+  computed,
+  nextTick,
+  watch,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  defineComponent
+} from 'vue'
 import { useWebsiteRecordStore } from '@/stores/records'
 import dagre from '@dagrejs/dagre'
 import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
@@ -152,7 +23,7 @@ defineComponent({
   name: 'VisualizationComponent'
 })
 
-const showCreateForm = (url:string) => {
+const showCreateForm = (url: string) => {
   formComponent.value.showCreationForm(url)
   tooltipOpacity.value = 0
 }
@@ -172,9 +43,27 @@ interface Edge extends vNG.Edge {
 type EdgePlaceHolder = [string, string]
 
 const nodes: Record<string, Node> = reactive({
-  node1: { name: 'example.com', crawled: true, title: 'example.com', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
-  node2: { name: 'http://example.com/home', crawled: true, title:'Example', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
-  node3: { name: 'https://exam.com/info', crawled: true, title:'Exam', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
+  node1: {
+    name: 'example.com',
+    crawled: true,
+    title: 'example.com',
+    crawledTime: '2021-10-02T13:00:00Z',
+    websiteRecords: ['Record', 'Example']
+  },
+  node2: {
+    name: 'http://example.com/home',
+    crawled: true,
+    title: 'Example',
+    crawledTime: '2021-10-02T13:00:00Z',
+    websiteRecords: ['Record', 'Example']
+  },
+  node3: {
+    name: 'https://exam.com/info',
+    crawled: true,
+    title: 'Exam',
+    crawledTime: '2021-10-02T13:00:00Z',
+    websiteRecords: ['Record', 'Example']
+  },
   node4: { name: 'https://www.exampl.com/about', crawled: false },
   node5: { name: 'example.com/contact', crawled: false }
 })
@@ -220,8 +109,7 @@ const layouts: vNG.Layouts = reactive({
 
 const eventHandlers: vNG.EventHandlers = {
   'node:dblclick': ({ node }) => {
-    if (viewToggle.value !== viewWebsites)
-      return
+    if (viewToggle.value !== viewWebsites) return
     targetNodeId.value = node
     tooltipOpacity.value = 1
     nextTick(() => {
@@ -229,8 +117,7 @@ const eventHandlers: vNG.EventHandlers = {
     })
   },
   'node:click': () => {
-    if (viewToggle.value === viewWebsites && tooltipOpacity.value === 1)
-      tooltipOpacity.value = 0
+    if (viewToggle.value === viewWebsites && tooltipOpacity.value === 1) tooltipOpacity.value = 0
   },
   'view:zoom': () => {
     adjustTooltipPosition()
@@ -238,9 +125,9 @@ const eventHandlers: vNG.EventHandlers = {
 }
 
 const tooltip = ref<HTMLDivElement>()
-const targetNodeId = ref<string>("")
+const targetNodeId = ref<string>('')
 const tooltipOpacity = ref<number>(0)
-const tooltipPos = ref({ left: "px", top: "0px" })
+const tooltipPos = ref({ left: 'px', top: '0px' })
 
 const targetNodePos = computed(() => {
   const nodePos = layouts.nodes[targetNodeId.value]
@@ -252,8 +139,8 @@ function adjustTooltipPosition() {
 
   const domPoint = graph.value.translateFromSvgToDomCoordinates(targetNodePos.value)
   tooltipPos.value = {
-    left: domPoint.x - tooltip.value.offsetWidth / 2 + "px",
-    top: domPoint.y - tooltip.value.offsetHeight - 30 + "px",
+    left: domPoint.x - tooltip.value.offsetWidth / 2 + 'px',
+    top: domPoint.y - tooltip.value.offsetHeight - 30 + 'px'
   }
 }
 
@@ -441,3 +328,143 @@ watch(
   { deep: true }
 )
 </script>
+
+<template>
+  <div class="bg-white dark:bg-dark-bg">
+    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
+      <button
+        class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
+        :class="[isExpanded ? 'transform rotate-180' : '']"
+      />
+      <h1 class="text-2xl text-center dark:text-dark-fg">Graph</h1>
+    </div>
+    <div v-if="isExpanded">
+      <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
+      <!-- bar holding top buttons -->
+      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+        <!-- view buttons container-->
+        <div class="pl-4 float-left">
+          <div class="toggle-container">
+            <label
+              :class="[
+                viewToggle === viewDomains ? 'bg-yellow-400 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleView(viewDomains)"
+            >
+              Domain View
+            </label>
+            <label
+              :class="[
+                viewToggle === viewWebsites ? 'bg-blue-600 text-white' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleView(viewWebsites)"
+            >
+              Website View
+            </label>
+          </div>
+        </div>
+        <!-- mode buttons container -->
+        <div class="flex space-x-1 pr-4 justify-end">
+          <div class="p-1 select-none cursor-default dark:text-dark-fg">Mode:</div>
+          <div class="toggle-container">
+            <label
+              :class="[
+                modeToggle === modeStatic ? 'bg-orange-500 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleMode(modeStatic)"
+            >
+              Static
+            </label>
+            <label
+              :class="[
+                modeToggle === modeLive ? 'bg-green-500 text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleMode(modeLive)"
+            >
+              Live
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- graph container -->
+      <div
+        class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"
+      >
+        <v-network-graph
+          class="graph"
+          ref="graph"
+          :nodes="nodes"
+          :edges="edges"
+          :layouts="layouts"
+          :configs="configs"
+          :eventHandlers="eventHandlers"
+        />
+        <div
+          ref="tooltip"
+          class="t-0 l-0 opacity-0 absolute p-2 grid place-content-center text-xs bg-gray-200 border border-dark-bg rounded-xl shadow"
+          :class="{ 'pointer-events-none': tooltipOpacity === 0 }"
+          :style="{ ...tooltipPos, opacity: tooltipOpacity }"
+        >
+          <div v-if="nodes[targetNodeId]?.crawled">
+            <p><b>Title:</b> {{ nodes[targetNodeId]?.title ?? '' }}</p>
+            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? '' }}</p>
+            <p><b>Crawled at:</b> {{ nodes[targetNodeId]?.crawledTime ?? 'unknown' }}</p>
+            <p title="Click on website record to start new execution"><b>Crawled by:</b> ⓘ</p>
+            <ul class="list-disc list-inside">
+              <!--              TODO crawl records on click; find record id by name in store?-->
+              <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record">
+                {{ record }}
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            <i>Not crawled due to boundary RegExp</i>
+            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? '' }}</p>
+            <div class="flex justify-center my-1">
+              <button
+                class="p-1 mx-auto select-none cursor-pointer border-2 border-dark-bg bg-green-500 rounded"
+                @click="showCreateForm(nodes[targetNodeId]?.name)"
+              >
+                Create Website Record
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bar holding bottom buttons -->
+      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+        <!-- layout buttons container -->
+        <div class="flex space-x-1 pr-4 justify-center">
+          <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>
+          <div class="toggle-container">
+            <label
+              :class="[
+                layoutToggle === layoutLR ? 'bg-[#0ff] text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleLayout(layoutLR)"
+            >
+              Left to Right
+            </label>
+            <label
+              :class="[
+                layoutToggle === layoutTB ? 'bg-[#0ff] text-black' : 'disabled-state',
+                'button-style'
+              ]"
+              @click="toggleLayout(layoutTB)"
+            >
+              Top to Bottom
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <WebsiteRecordFormComponent ref="formComponent" />
+  </div>
+</template>

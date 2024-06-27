@@ -1,15 +1,223 @@
+<script setup lang="ts">
+import { watch, reactive, computed, onMounted, ref, defineComponent } from 'vue'
+import { useWebsiteRecordStore } from '@/stores/records'
+import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
+
+const store = useWebsiteRecordStore()
+
+const fetchRecords = async () => {
+  await store.fetchRecords()
+}
+
+// onMounted(fetchRecords)
+
+const formComponent: any = ref(null)
+const showCreateForm = () => {
+  formComponent.value.showCreationForm()
+}
+
+const showEditForm = (
+  id: string,
+  label: string,
+  url: string,
+  regexp: string,
+  tags: string[],
+  periodicity: number,
+  status: boolean
+) => {
+  formComponent.value.showEditForm(id, label, url, regexp, tags, periodicity, status)
+}
+
+const currentPage = ref(1)
+const pageSize = ref(8)
+const filter = ref({ url: '', label: '', tag: '' })
+const sort = ref('url')
+
+async function activateRecord(id: string, isActive: boolean) {
+  //onclick status, TODO: remove?
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  if (!records.find((record) => record.id === id)) return
+  records.find((record) => record.id === id)!.isActive = isActive
+}
+
+async function deleteRecord(id: string) {
+  await store.deleteRecord(id.toString()).then(() => {
+    //TODO do at store
+    records.splice(
+      records.findIndex((record) => record.id === id),
+      1
+    )
+  })
+}
+
+const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
+
+function sortRecords() {
+  records.sort((a, b) => {
+    if (sort.value === 'url') {
+      return a.url.localeCompare(b.url)
+    } else if (sort.value === 'label') {
+      return a.label.localeCompare(b.label)
+    } else if (sort.value === 'periodicity') {
+      return a.periodicity - b.periodicity
+    } else if (sort.value === 'lastCrawled') {
+      return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
+    }
+    return 0
+  })
+}
+
+const filteredRecords = computed(() => {
+  return records.filter((record) => {
+    const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true
+    const labelFilter = filter.value.label ? record.label.includes(filter.value.label) : true
+    const tagsFilter =
+      filter.value.tag.length > 0 ? record.tags.some((tag) => tag.includes(filter.value.tag)) : true
+    return urlFilter && labelFilter && tagsFilter
+  })
+})
+
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredRecords.value.slice(start, end)
+})
+
+watch(() => sort.value, sortRecords)
+
+//const records = computed(() => store.records) //TODO: uncomment
+const records = reactive([
+  {
+    id: '1',
+    url: 'https://www.google.com',
+    label: 'Google',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 1,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '2',
+    url: 'https://www.bing.com',
+    label: 'Bing',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 24,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '3',
+    url: 'https://www.yahoo.com',
+    label: 'Yahoo',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 12,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '4',
+    url: 'https://www.duckduckgo.com',
+    label: 'DuckDuckGo',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 1,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '5',
+    url: 'https://www.ecosia.com',
+    label: 'Ecosia',
+    tags: ['search', 'engine'],
+    regexp: '(www\\.)?ecosia\\.com/.*',
+    periodicity: 48,
+    lastExecutionTime: '2021-10-02T13:50:20Z',
+    lastExecutionStatus: 'success',
+    isActive: false,
+    addedToGraph: false
+  },
+  {
+    id: '6',
+    url: 'https://www.example.com',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '7',
+    url: 'https://www.example.org',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '8',
+    url: 'https://www.example.net',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '9',
+    url: 'https://www.example.edu',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: '10',
+    url: 'https://www.example.gov',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 2,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  }
+  // TODO: communication with server
+])
+</script>
+
 <template>
   <div>
     <h1 class="text-4xl font-bold text-center mt-8">Website Records</h1>
     <div class="flex justify-center my-4">
-      <!-- prettier-ignore-attribute -->
       <button
         class="px-4 py-2 select-none cursor-pointer border-2 border-dark-bg dark:border-dark-fg rounded bg-[#ff0] dark:bg-[#550] dark:hover:bg-[#990] text-black dark:text-white dark:font-bold hover:bg-[#fd0] font-bold"
-        @click="
-            // clearForm();
-            // showForm = true
-            showCreateForm()
-          "
+        @click="showCreateForm()"
       >
         Create New Website Record
       </button>
@@ -56,7 +264,6 @@
         </select>
       </div>
     </div>
-    <!--        <hr class="border border-dark-bg dark:border-dark-fg z-0 mt-10" />-->
     <div class="flex justify-center space-x-4 mt-4" v-if="paginatedRecords.length > 0">
       <div class="bg-white dark:bg-dark-bg">
         <button
@@ -90,7 +297,6 @@
     <div v-else>
       <p class="text-center m-6 font-bold text-xl">There are no records yet</p>
     </div>
-    <!--    <hr class="border border-dark-bg dark:border-dark-fg z-0 mt-4" />-->
     <div class="flex flex-wrap justify-center">
       <div v-for="record in paginatedRecords" :key="record.id" class="flex justify-center px-4">
         <div
@@ -98,24 +304,22 @@
         >
           <h2 class="py-1 text-xl font-bold text-center my-2">{{ record.label }}</h2>
           <div class="flex justify-center space-x-4 mb-2">
-            <!-- prettier-ignore-attribute -->
             <button
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-orange-500 text-black dark:bg-[#a30] dark:text-white dark:font-bold dark:hover:bg-[#e70] hover:bg-[#fd9a66]"
               @click="
-                // formFields.creation = false;
-                // formFields.label = record.label;
-                // formFields.url = record.url;
-                // formFields.regexp = record.regexp;
-                // formFields.tags = record.tags.join(', ');
-                // formFields.periodicity = record.periodicity;
-                // formFields.status = record.isActive;
-                // showForm = true
-                showEditForm(record.id, record.label, record.url, record.regexp, record.tags, record.periodicity, record.isActive)
+                showEditForm(
+                  record.id,
+                  record.label,
+                  record.url,
+                  record.regexp,
+                  record.tags,
+                  record.periodicity,
+                  record.isActive
+                )
               "
             >
               Edit
             </button>
-            <!-- prettier-ignore-attribute -->
             <button
               v-if="!record.addedToGraph"
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-green-400 dark:bg-[#161] dark:hover:bg-[#1a1] text-black dark:text-white dark:font-bold hover:bg-green-300"
@@ -123,7 +327,6 @@
             >
               Add to Graph
             </button>
-            <!-- prettier-ignore-attribute -->
             <button
               v-else
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#f00] dark:text-white dark:bg-[#a00] dark:hover:bg-[#c00] dark:font-bold hover:bg-[#f50]"
@@ -185,7 +388,6 @@
       </div>
     </div>
 
-    <!--    <hr class="border border-dark-bg dark:border-dark-fg z-0 mt-6" />-->
     <div class="flex justify-center space-x-4 mb-4" v-if="paginatedRecords.length > 0">
       <div class="bg-white dark:bg-dark-bg">
         <button
@@ -216,211 +418,3 @@
     <WebsiteRecordFormComponent ref="formComponent" />
   </div>
 </template>
-
-<script setup lang="ts">
-import { watch, reactive, computed, onMounted, ref, defineComponent } from 'vue'
-import { useWebsiteRecordStore } from '@/stores/records'
-import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
-
-const store = useWebsiteRecordStore()
-
-const fetchRecords = async () => {
-  await store.fetchRecords()
-}
-
-// onMounted(fetchRecords)
-
-const formComponent: any = ref(null)
-const showCreateForm = () => {
-  formComponent.value.showCreationForm()
-}
-
-const showEditForm = (id:string, label:string, url:string, regexp:string, tags:string[], periodicity:number, status:boolean) => {
-  formComponent.value.showEditForm(id, label, url, regexp, tags, periodicity, status)
-}
-
-const currentPage = ref(1)
-const pageSize = ref(8)
-const filter = ref({ url: '', label: '', tag: '' })
-const sort = ref('url')
-
-async function activateRecord(id: string, isActive: boolean) {
-  //onclick status, TODO: remove?
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-  if (!records.find((record) => record.id === id)) return
-  records.find((record) => record.id === id)!.isActive = isActive
-}
-
-async function deleteRecord(id: string) {
-  await store.deleteRecord(id.toString())
-    .then(() => {
-      //TODO do at store
-      records.splice(
-        records.findIndex((record) => record.id === id),
-        1
-      )
-    })
-}
-
-const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
-
-function sortRecords() {
-  records.sort((a, b) => {
-    if (sort.value === 'url') {
-      return a.url.localeCompare(b.url)
-    } else if (sort.value === 'label') {
-      return a.label.localeCompare(b.label)
-    } else if (sort.value === 'periodicity') {
-      return a.periodicity - b.periodicity
-    } else if (sort.value === 'lastCrawled') {
-      return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
-    }
-    return 0
-  })
-}
-
-const filteredRecords = computed(() => {
-  return records.filter((record) => {
-    const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true
-    const labelFilter = filter.value.label ? record.label.includes(filter.value.label) : true
-    const tagsFilter =
-      filter.value.tag.length > 0
-        ? record.tags.some((tag) => tag.includes(filter.value.tag))
-        : true
-    return urlFilter && labelFilter && tagsFilter
-  })
-})
-
-const paginatedRecords = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredRecords.value.slice(start, end)
-})
-
-watch(() => sort.value, sortRecords);
-
-//const records = computed(() => store.records) //TODO: uncomment
-const records = reactive([
-  {
-    id: "1",
-    url: 'https://www.google.com',
-    label: 'Google',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 1,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "2",
-    url: 'https://www.bing.com',
-    label: 'Bing',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 24,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "3",
-    url: 'https://www.yahoo.com',
-    label: 'Yahoo',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 12,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "4",
-    url: 'https://www.duckduckgo.com',
-    label: 'DuckDuckGo',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 1,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "5",
-    url: 'https://www.ecosia.com',
-    label: 'Ecosia',
-    tags: ['search', 'engine'],
-    regexp: '(www\\.)?ecosia\\.com/.*',
-    periodicity: 48,
-    lastExecutionTime: '2021-10-02T13:50:20Z',
-    lastExecutionStatus: 'success',
-    isActive: false,
-    addedToGraph: false
-  },
-  {
-    id: "6",
-    url: 'https://www.example.com',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "7",
-    url: 'https://www.example.org',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "8",
-    url: 'https://www.example.net',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "9",
-    url: 'https://www.example.edu',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: "10",
-    url: 'https://www.example.gov',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 2,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  }
-  // TODO: communication with server
-])
-</script>

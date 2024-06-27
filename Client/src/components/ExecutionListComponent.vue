@@ -1,5 +1,140 @@
+<script setup lang="ts">
+import { watch, onMounted, onUnmounted, computed, ref, defineComponent } from 'vue'
+defineComponent({
+  name: 'ExecutionListComponent'
+})
+
+const isExpanded = ref(false)
+
+const executions = ref(
+  [
+    {
+      id: 15,
+      time: '2021-10-02T13:00:00Z',
+      label: 'Record',
+      numberOfSitesCrawled: 7,
+      status: 'unknown'
+    }
+    // TODO: communication with server
+  ].map((execution) => ({ ...execution, checked: true }))
+)
+
+const currentPage = ref(1)
+const pageSize = ref(11)
+const sortColumn = ref('time')
+const sortOrder = ref('desc')
+
+const uniqueExecutions = computed(() => {
+  // used for filtering
+  const uniqueLabels = new Set()
+  return executions.value.filter((execution) => {
+    if (!uniqueLabels.has(execution.label)) {
+      uniqueLabels.add(execution.label)
+      return true
+    }
+    return false
+  })
+})
+
+const sortedExecutions = computed(() => {
+  if (!sortColumn.value) return executions.value
+  const sorted = [...executions.value]
+  sorted.sort((a: any, b: any) => {
+    if (a[sortColumn.value] < b[sortColumn.value]) return sortOrder.value === 'asc' ? -1 : 1
+    if (a[sortColumn.value] > b[sortColumn.value]) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
+  })
+  return sorted
+})
+
+const filteredExecutions = computed(() => {
+  const checkedLabels = new Set()
+  uniqueExecutions.value.forEach((execution) => {
+    if (execution.checked) {
+      checkedLabels.add(execution.label)
+    }
+  })
+  return sortedExecutions.value.filter((execution) => checkedLabels.has(execution.label))
+})
+
+const paginatedExecutions = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredExecutions.value.slice(start, end)
+})
+
+const sortTable = (column: string) => {
+  if (sortColumn.value === column) sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  else {
+    sortColumn.value = column
+    sortOrder.value = 'asc'
+  }
+}
+
+const formatDate = (dateString: string) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit'
+  }
+  return new Date(dateString).toLocaleString('cs-CZ', options)
+}
+
+const allChecked = computed({
+  get: () => executions.value.every((execution) => execution.checked),
+  set: (newValue) => executions.value.forEach((execution) => (execution.checked = newValue))
+})
+
+const filterBoxExpanded = ref(false)
+
+const showCheckboxes = () => {
+  const checkboxes = document.getElementById('checkboxes')
+  if (!checkboxes) return
+  if (!filterBoxExpanded.value) {
+    checkboxes.style.display = 'block'
+    filterBoxExpanded.value = true
+  } else {
+    checkboxes.style.display = 'none'
+    filterBoxExpanded.value = false
+  }
+}
+
+const hideCheckboxes = () => {
+  const checkboxes = document.getElementById('checkboxes')
+  if (!checkboxes) return
+  checkboxes.style.display = 'none'
+  filterBoxExpanded.value = false
+}
+
+const onClickOutside = (event: MouseEvent) => {
+  const checkboxes = document.getElementById('checkboxes')
+  const dropdown = document.getElementById('dropdown')
+  if (dropdown && dropdown.contains(event.target as Node)) return
+  if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
+}
+
+const executionList = ref()
+
+onMounted(() => {
+  document.addEventListener('click', onClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+})
+
+watch(filteredExecutions, () => {
+  const totalPages = Math.ceil(filteredExecutions.value.length / pageSize.value)
+  if (currentPage.value > totalPages) currentPage.value = totalPages
+  if (currentPage.value === 0) currentPage.value = 1
+})
+</script>
+
 <template>
-  <div class="execution-list bg-white dark:bg-dark-bg" ref="executionList">
+  <div class="bg-white dark:bg-dark-bg" ref="executionList">
     <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
@@ -145,136 +280,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { watch, onMounted, onUnmounted, computed, ref, defineComponent } from 'vue'
-defineComponent({
-  name: 'ExecutionListComponent'
-})
-
-const isExpanded = ref(false)
-
-const executions = ref(
-  [
-    {
-      id: 15,
-      time: '2021-10-02T13:00:00Z',
-      label: 'Record',
-      numberOfSitesCrawled: 7,
-      status: 'unknown'
-    }
-    // TODO: communication with server
-  ].map((execution) => ({ ...execution, checked: true }))
-)
-
-const currentPage = ref(1)
-const pageSize = ref(11)
-const sortColumn = ref('time')
-const sortOrder = ref('desc')
-
-const uniqueExecutions = computed(() => {
-  // used for filtering
-  const uniqueLabels = new Set()
-  return executions.value.filter((execution) => {
-    if (!uniqueLabels.has(execution.label)) {
-      uniqueLabels.add(execution.label)
-      return true
-    }
-    return false
-  })
-})
-
-const sortedExecutions = computed(() => {
-  if (!sortColumn.value) return executions.value
-  const sorted = [...executions.value]
-  sorted.sort((a: any, b: any) => {
-    if (a[sortColumn.value] < b[sortColumn.value]) return sortOrder.value === 'asc' ? -1 : 1
-    if (a[sortColumn.value] > b[sortColumn.value]) return sortOrder.value === 'asc' ? 1 : -1
-    return 0
-  })
-  return sorted
-})
-
-const filteredExecutions = computed(() => {
-  const checkedLabels = new Set()
-  uniqueExecutions.value.forEach((execution) => {
-    if (execution.checked) {
-      checkedLabels.add(execution.label)
-    }
-  })
-  return sortedExecutions.value.filter((execution) => checkedLabels.has(execution.label))
-})
-
-const paginatedExecutions = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredExecutions.value.slice(start, end)
-})
-
-const sortTable = (column: string) => {
-  if (sortColumn.value === column) sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  else {
-    sortColumn.value = column
-    sortOrder.value = 'asc'
-  }
-}
-
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }
-  return new Date(dateString).toLocaleString('cs-CZ', options)
-}
-
-const allChecked = computed({
-  get: () => executions.value.every((execution) => execution.checked),
-  set: (newValue) => executions.value.forEach((execution) => (execution.checked = newValue))
-})
-
-const filterBoxExpanded = ref(false)
-
-const showCheckboxes = () => {
-  const checkboxes = document.getElementById('checkboxes')
-  if (!checkboxes) return
-  if (!filterBoxExpanded.value) {
-    checkboxes.style.display = 'block'
-    filterBoxExpanded.value = true
-  } else {
-    checkboxes.style.display = 'none'
-    filterBoxExpanded.value = false
-  }
-}
-
-const hideCheckboxes = () => {
-  const checkboxes = document.getElementById('checkboxes')
-  if (!checkboxes) return
-  checkboxes.style.display = 'none'
-  filterBoxExpanded.value = false
-}
-
-const onClickOutside = (event: MouseEvent) => {
-  const checkboxes = document.getElementById('checkboxes')
-  const dropdown = document.getElementById('dropdown')
-  if (dropdown && dropdown.contains(event.target as Node)) return
-  if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
-}
-
-const executionList = ref()
-
-onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', onClickOutside)
-})
-
-watch(filteredExecutions, () => {
-  const totalPages = Math.ceil(filteredExecutions.value.length / pageSize.value)
-  if (currentPage.value > totalPages) currentPage.value = totalPages
-  if (currentPage.value === 0) currentPage.value = 1
-})
-</script>
