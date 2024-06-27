@@ -1,158 +1,14 @@
 <template>
   <div>
-    <div :class="[showForm ? 'block' : 'hidden']">
-      <!-- the veil -->
-      <!-- prettier-ignore-attribute -->
-      <div
-        class="fixed top-0 left-0 w-full h-full z-50 bg-[rgba(0,0,0,0.5)]"
-        @click="clearForm(); showForm = false"
-      />
-      <div
-        class="bg-gray-200 dark:bg-dark-bg border-2 border-dark-bg dark:border-dark-fg rounded-2xl py-4 px-8 z-50 fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]"
-      >
-        <!-- THIS IS NOT THE YELLOW BUTTON -->
-        <h1 v-if="formFields.creation" class="py-2 text-xl font-bold text-center mb-4">
-          Create New Record
-        </h1>
-        <h1 v-else class="py-2 text-xl font-bold text-center mb-4">Edit Record</h1>
-        <form @submit.prevent="handleSubmit" class="space-y-2">
-          <div>
-            <label for="label" class="w-[100px] float-left" title="Name of your website record"
-              >Label:</label
-            >
-            <input
-              type="text"
-              id="label"
-              name="label"
-              class="rounded text-black pl-1"
-              v-model="formFields.label"
-            />
-          </div>
-          <div>
-            <label for="url" class="w-[100px] float-left" title="Starting URL">URL:</label>
-            <input
-              type="text"
-              id="url"
-              name="url"
-              class="rounded text-black pl-1"
-              v-model="formFields.url"
-            />
-          </div>
-          <div>
-            <label
-              for="regex"
-              class="w-[100px] float-left"
-              title="May restrict what pages should be crawled"
-              >RegEx:</label
-            >
-            <input
-              type="text"
-              id="regex"
-              name="regex"
-              class="rounded text-black pl-1"
-              v-model="formFields.regexp"
-            />
-          </div>
-          <div>
-            <label
-              for="tags"
-              class="w-[100px] float-left"
-              title="You can choose to add your own tags for the record"
-              >Tags:</label
-            >
-            <input
-              type="text"
-              id="tags"
-              name="tags"
-              class="rounded text-black pl-1"
-              v-model="formFields.tags"
-            />
-          </div>
-          <div>
-            <label
-              for="periodicity"
-              class="w-[100px] float-left"
-              title="How often is record executed"
-              >Periodicity:</label
-            >
-            <input
-              type="number"
-              id="periodicity"
-              name="periodicity"
-              min="0"
-              class="rounded text-black pl-1 w-10"
-              v-model="formFields.periodicity"
-            />
-            /day
-          </div>
-          <!-- status buttons container -->
-          <div class="flex space-x-1 pr-4">
-            <label
-              class="p-1 select-none cursor-default dark:text-dark-fg w-[94px]"
-              title="Indicates, whether or not should the record be periodically executed. Can be changed later"
-              >Status:</label
-            >
-            <div class="toggle-container">
-              <label
-                @click="formFields.status = true"
-                :class="[
-                  formFields.status ? 'bg-[#0f0] text-black' : 'disabled-state',
-                  'button-style'
-                ]"
-              >
-                Active
-              </label>
-              <label
-                @click="formFields.status = false"
-                :class="[
-                  !formFields.status ? 'bg-[#f00] text-black' : 'disabled-state',
-                  'button-style'
-                ]"
-              >
-                Inactive
-              </label>
-            </div>
-          </div>
-          <div class="flex justify-center space-x-4 mb-2 pt-4">
-            <!-- prettier-ignore-attribute -->
-            <button
-              type="button"
-              class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#f00] hover:bg-[#e00] font-bold"
-              @click="
-                clearForm();
-                showForm = false
-              "
-            >
-              Cancel
-            </button>
-            <button
-              v-if="formFields.creation"
-              type="submit"
-              class="button-style border-2 border-dark-bg dark:border-[#0f0] rounded bg-[#0f0] hover:bg-[#0d0] font-bold text-black"
-            >
-              Save
-            </button>
-
-            <button
-              v-else
-              type="submit"
-              class="button-style border-2 border-dark-bg dark:border-[#0cf] rounded bg-[#0cf] hover:bg-[#0bd] font-bold text-black"
-            >
-              Update
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
     <h1 class="text-4xl font-bold text-center mt-8">Website Records</h1>
     <div class="flex justify-center my-4">
       <!-- prettier-ignore-attribute -->
       <button
         class="px-4 py-2 select-none cursor-pointer border-2 border-dark-bg dark:border-dark-fg rounded bg-[#ff0] dark:bg-[#550] dark:hover:bg-[#990] text-black dark:text-white dark:font-bold hover:bg-[#fd0] font-bold"
         @click="
-            clearForm();
-            showForm = true
+            // clearForm();
+            // showForm = true
+            showCreateForm()
           "
       >
         Create New Website Record
@@ -246,14 +102,15 @@
             <button
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-orange-500 text-black dark:bg-[#a30] dark:text-white dark:font-bold dark:hover:bg-[#e70] hover:bg-[#fd9a66]"
               @click="
-                formFields.creation = false;
-                formFields.label = record.label;
-                formFields.url = record.url;
-                formFields.regexp = record.regexp;
-                formFields.tags = record.tags.join(', ');
-                formFields.periodicity = record.periodicity;
-                formFields.status = record.isActive;
-                showForm = true
+                // formFields.creation = false;
+                // formFields.label = record.label;
+                // formFields.url = record.url;
+                // formFields.regexp = record.regexp;
+                // formFields.tags = record.tags.join(', ');
+                // formFields.periodicity = record.periodicity;
+                // formFields.status = record.isActive;
+                // showForm = true
+                showEditForm(record.id, record.label, record.url, record.regexp, record.tags, record.periodicity, record.isActive)
               "
             >
               Edit
@@ -356,80 +213,53 @@
         </button>
       </div>
     </div>
+    <WebsiteRecordFormComponent ref="formComponent" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { watch, reactive, computed, onMounted, ref, defineComponent } from 'vue'
 import { useWebsiteRecordStore } from '@/stores/records'
-
-const formFields = reactive({
-  creation: true,
-  label: '',
-  url: '',
-  regexp: '',
-  tags: '',
-  periodicity: 0,
-  status: true
-})
-
-function clearForm() {
-  formFields.creation = true
-  formFields.label = ''
-  formFields.url = ''
-  formFields.regexp = ''
-  formFields.tags = ''
-  formFields.periodicity = 0
-  formFields.status = true
-}
-
-const handleSubmit = () => {
-  // Handle form submission
-}
+import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
 
 const store = useWebsiteRecordStore()
+
+const fetchRecords = async () => {
+  await store.fetchRecords()
+}
+
+// onMounted(fetchRecords)
+
+const formComponent: any = ref(null)
+const showCreateForm = () => {
+  formComponent.value.showCreationForm()
+}
+
+const showEditForm = (id:string, label:string, url:string, regexp:string, tags:string[], periodicity:number, status:boolean) => {
+  formComponent.value.showEditForm(id, label, url, regexp, tags, periodicity, status)
+}
+
 const currentPage = ref(1)
 const pageSize = ref(8)
 const filter = ref({ url: '', label: '', tag: '' })
 const sort = ref('url')
 
-const fetchRecords = async () => {
-  await store.fetchRecords(currentPage.value, pageSize.value, filter.value, sort.value)
-}
-
-async function activateRecord(id: number, isActive: boolean) {
+async function activateRecord(id: string, isActive: boolean) {
+  //onclick status, TODO: remove?
   await new Promise((resolve) => setTimeout(resolve, 1000))
   if (!records.find((record) => record.id === id)) return
   records.find((record) => record.id === id)!.isActive = isActive
 }
 
-//onMounted(fetchRecords)
-
-//const records = computed(() => store.records)
-const records = reactive([
-  {
-    id: 1,
-    url: 'https://www.google.com',
-    label: 'Google',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 1,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  // TODO: communication with server
-])
-
-const showForm = ref(false)
-
-async function deleteRecord(id: number) {
+async function deleteRecord(id: string) {
   await store.deleteRecord(id.toString())
-  records.splice(
-    records.findIndex((record) => record.id === id),
-    1
-  )
+    .then(() => {
+      //TODO do at store
+      records.splice(
+        records.findIndex((record) => record.id === id),
+        1
+      )
+    })
 }
 
 const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
@@ -468,4 +298,129 @@ const paginatedRecords = computed(() => {
 })
 
 watch(() => sort.value, sortRecords);
+
+//const records = computed(() => store.records) //TODO: uncomment
+const records = reactive([
+  {
+    id: "1",
+    url: 'https://www.google.com',
+    label: 'Google',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 1,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "2",
+    url: 'https://www.bing.com',
+    label: 'Bing',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 24,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "3",
+    url: 'https://www.yahoo.com',
+    label: 'Yahoo',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 12,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "4",
+    url: 'https://www.duckduckgo.com',
+    label: 'DuckDuckGo',
+    tags: ['search', 'engine'],
+    regexp: '.*',
+    periodicity: 1,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "5",
+    url: 'https://www.ecosia.com',
+    label: 'Ecosia',
+    tags: ['search', 'engine'],
+    regexp: '(www\\.)?ecosia\\.com/.*',
+    periodicity: 48,
+    lastExecutionTime: '2021-10-02T13:50:20Z',
+    lastExecutionStatus: 'success',
+    isActive: false,
+    addedToGraph: false
+  },
+  {
+    id: "6",
+    url: 'https://www.example.com',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "7",
+    url: 'https://www.example.org',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "8",
+    url: 'https://www.example.net',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "9",
+    url: 'https://www.example.edu',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 0,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  },
+  {
+    id: "10",
+    url: 'https://www.example.gov',
+    label: 'Example',
+    tags: ['example'],
+    regexp: '.*',
+    periodicity: 2,
+    lastExecutionTime: '2021-10-02T13:00:00Z',
+    lastExecutionStatus: 'unknown',
+    isActive: true,
+    addedToGraph: false
+  }
+  // TODO: communication with server
+])
 </script>
