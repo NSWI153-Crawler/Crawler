@@ -73,6 +73,35 @@
           :configs="configs"
           :eventHandlers="eventHandlers"
         />
+        <div
+          ref="tooltip"
+          class="t-0 l-0 opacity-0 absolute p-2 grid place-content-center text-xs bg-gray-200 border border-dark-bg rounded-xl shadow"
+          :class="{ 'pointer-events-none': tooltipOpacity === 0 }"
+          :style="{ ...tooltipPos, opacity: tooltipOpacity }"
+        >
+          <div v-if="nodes[targetNodeId]?.crawled">
+            <p><b>Title:</b> {{ nodes[targetNodeId]?.title ?? "" }}</p>
+            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? "" }}</p>
+            <p><b>Crawled at:</b> {{ nodes[targetNodeId]?.crawledTime ?? "unknown" }}</p>
+            <p title="Click on website record to start new execution"><b>Crawled by:</b>    ⓘ</p>
+            <ul class="list-disc list-inside">
+<!--              TODO crawl records on click; find record id by name in store?-->
+              <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record">{{ record }}</li>
+            </ul>
+          </div>
+          <div v-else>
+            <i>Not crawled due to boundary RegExp</i>
+            <p><b>Url:</b> {{ nodes[targetNodeId]?.name ?? "" }}</p>
+            <div class="flex justify-center my-1">
+              <button
+                class="p-1 mx-auto select-none cursor-pointer border-2 border-dark-bg bg-green-500 rounded"
+                @click="showCreateForm(nodes[targetNodeId]?.name)"
+              >
+                Create Website Record
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- bar holding bottom buttons -->
@@ -103,30 +132,37 @@
         </div>
       </div>
     </div>
+    <WebsiteRecordFormComponent ref="formComponent" />
   </div>
 </template>
 
 <script setup lang="ts">
 import * as vNG from 'v-network-graph'
-import { computed, onMounted, reactive, ref, defineComponent } from 'vue'
-import { useWebsiteRecordStore } from '../stores/records'
+import { computed, nextTick, watch, onMounted, onUnmounted, reactive, ref, defineComponent } from 'vue'
+import { useWebsiteRecordStore } from '@/stores/records'
 import dagre from '@dagrejs/dagre'
+import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
+
+const isExpanded = ref(false)
+const formComponent: any = ref(null)
+const graph = ref<vNG.VNetworkGraphInstance>()
+const store = useWebsiteRecordStore()
 
 defineComponent({
   name: 'VisualizationComponent'
 })
 
-const isExpanded = ref(false)
-const graph = ref<vNG.VNetworkGraphInstance>()
-const store = useWebsiteRecordStore()
-
-onMounted(() => {
-  layout('LR')
-})
+const showCreateForm = (url:string) => {
+  formComponent.value.showCreationForm(url)
+  tooltipOpacity.value = 0
+}
 
 interface Node extends vNG.Node {
   name: string
   crawled: boolean
+  title?: string
+  crawledTime?: string
+  websiteRecords?: string[]
 }
 type NodePlaceHolder = [string, boolean]
 
@@ -136,9 +172,9 @@ interface Edge extends vNG.Edge {
 type EdgePlaceHolder = [string, string]
 
 const nodes: Record<string, Node> = reactive({
-  node1: { name: 'example.com', crawled: true },
-  node2: { name: 'http://example.com/home', crawled: true },
-  node3: { name: 'https://exam.com/info', crawled: true },
+  node1: { name: 'example.com', crawled: true, title: 'example.com', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
+  node2: { name: 'http://example.com/home', crawled: true, title:'Example', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
+  node3: { name: 'https://exam.com/info', crawled: true, title:'Exam', crawledTime: '2021-10-02T13:00:00Z', websiteRecords: ['Record', 'Example'] },
   node4: { name: 'https://www.exampl.com/about', crawled: false },
   node5: { name: 'example.com/contact', crawled: false }
 })
@@ -183,18 +219,48 @@ const layouts: vNG.Layouts = reactive({
 })
 
 const eventHandlers: vNG.EventHandlers = {
-  'node:dblclick': ({ node, event }) => {
-    if (viewToggle.value !== viewWebsites) return
-    //TODO
-    if (nodes[node].crawled) {
-      // send request to backend for it with URL in body?
-      // then Node with the newest crawl time and list of all website record with this node will be returned
-      console.log(
-        'open node detail: URL, Crawl Time, list of website record that crawled this node'
-      )
-    } else {
-      console.log('open node detail: URL')
-    }
+  'node:dblclick': ({ node }) => {
+    if (viewToggle.value !== viewWebsites)
+      return
+    targetNodeId.value = node
+    tooltipOpacity.value = 1
+    nextTick(() => {
+      adjustTooltipPosition()
+    })
+  },
+  'node:click': () => {
+    if (viewToggle.value === viewWebsites && tooltipOpacity.value === 1)
+      tooltipOpacity.value = 0
+  },
+  'view:zoom': () => {
+    adjustTooltipPosition()
+  }
+}
+
+const tooltip = ref<HTMLDivElement>()
+const targetNodeId = ref<string>("")
+const tooltipOpacity = ref<number>(0)
+const tooltipPos = ref({ left: "px", top: "0px" })
+
+const targetNodePos = computed(() => {
+  const nodePos = layouts.nodes[targetNodeId.value]
+  return nodePos || { x: 0, y: 0 }
+})
+
+function adjustTooltipPosition() {
+  if (!graph.value || !tooltip.value) return
+
+  const domPoint = graph.value.translateFromSvgToDomCoordinates(targetNodePos.value)
+  tooltipPos.value = {
+    left: domPoint.x - tooltip.value.offsetWidth / 2 + "px",
+    top: domPoint.y - tooltip.value.offsetHeight - 30 + "px",
+  }
+}
+
+const checkIfClickedOutside = (event: MouseEvent) => {
+  // Hides tooltip if clicked outside
+  if (!tooltip.value || !tooltip.value.contains(event.target as HTMLElement)) {
+    tooltipOpacity.value = 0
   }
 }
 
@@ -230,6 +296,8 @@ function toggleMode(mode: 'static' | 'live') {
   if (mode === modeToggle.value) return
   modeToggle.value = mode
   if (mode === modeStatic) {
+    //TODO
+  } else if (mode === modeLive) {
     //TODO
   }
 }
@@ -349,11 +417,27 @@ function convertWebsiteEdgesToDomainEdges(websiteEdges: EdgePlaceHolder[]): Edge
 function extractDomain(url: string): string | null {
   try {
     const matches = url.match(/^(https?:\/\/)?(www.)?([^/?#]+)(?:[/?#]|$)/i)
-    const domain = matches && matches[3]
-    return domain
+    return matches && matches[3]
   } catch (error) {
     console.error('Invalid URL:', error)
     return null
   }
 }
+
+onMounted(() => {
+  layout('LR')
+  window.addEventListener('click', checkIfClickedOutside)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', checkIfClickedOutside)
+})
+
+watch(
+  () => [targetNodePos.value, tooltipOpacity.value],
+  () => {
+    adjustTooltipPosition()
+  },
+  { deep: true }
+)
 </script>
