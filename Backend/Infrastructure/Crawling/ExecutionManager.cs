@@ -16,9 +16,9 @@ namespace Infrastructure.Crawling;
     {
         private readonly IWebsiteRecordRepository _websiteRecordRepository;
         private readonly IExecutionRepository _executionRepository;
-        private readonly Crawler _crawler;
+        private readonly ICrawler _crawler;
 
-        public ExecutionManager(IWebsiteRecordRepository websiteRecordRepository, IExecutionRepository executionRepository, Crawler crawler)
+        public ExecutionManager(IWebsiteRecordRepository websiteRecordRepository, IExecutionRepository executionRepository, ICrawler crawler)
         {
             _websiteRecordRepository = websiteRecordRepository;
             _executionRepository = executionRepository;
@@ -66,8 +66,7 @@ namespace Infrastructure.Crawling;
 
         public async Task<IEnumerable<Execution?>> GetExecutionsForWebsiteRecordAsync(Guid websiteRecordId)
         {   
-            //TODO: implement GetByIdAsync(). get all executions of a website record
-            return await _executionRepository.GetByIdAsync(websiteRecordId);
+            return await _executionRepository.GetAllExecutionsFromWebsiteRecord(websiteRecordId);
         }
 
         public async Task<Execution?> GetExecutionByIdAsync(Guid executionId)
@@ -77,7 +76,6 @@ namespace Infrastructure.Crawling;
 
         public async Task SchedulePeriodicExecutionsAsync()
         {
-            //TODO: implement GetActiveRecordsAsync() for records
             var activeRecords = await _websiteRecordRepository.GetActiveRecordsAsync();
             foreach (var record in activeRecords)
             {
@@ -95,8 +93,8 @@ namespace Infrastructure.Crawling;
             return timeSinceLastExecution.TotalMinutes >= periodicity;
         }
 
-        public async Task<Execution> GetLastExecutionFromWebsiteRecord(WebsiteRecord record)
+        public async Task<Execution?> GetLastExecutionFromWebsiteRecord(WebsiteRecord record)
         {
-            return await _executionRepository.GetLastExecutionFromWebsiteRecord(record);
+            return await _executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
         }
     }

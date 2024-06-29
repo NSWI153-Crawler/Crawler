@@ -11,7 +11,7 @@ namespace Domain.Entities
     {
         public Guid Id { get; set; }
         public string Url { get; set; }
-        public int CrawlTime { get; set; }
+        public DateTime CrawlTime { get; set; }
         public string Title { get; set; }
         public Guid OwnerId { get; set; }
         public WebsiteRecord Owner { get; set; }

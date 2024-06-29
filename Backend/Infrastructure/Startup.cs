@@ -1,4 +1,6 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
+using Infrastructure.Crawling;
 using Infrastructure.Persistence.Contexts;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +40,8 @@ namespace Infrastructure
                     .EnableDetailedErrors()
             ).AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>()
             .AddScoped<IExecutionRepository, ExecutionRepository>()
-            .AddScoped<ICrawlNodeRepository, CrawlNodeRepository>();
+            .AddScoped<ICrawlNodeRepository, CrawlNodeRepository>()
+            .AddScoped<ICrawler, Crawler>();
         }
     }
 }

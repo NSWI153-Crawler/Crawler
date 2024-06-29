@@ -9,7 +9,7 @@ namespace Domain.Interfaces
 {
     public interface ICrawler
     {
-        public Task<Execution> CrawlWebsiteRecord(WebsiteRecord websiteRecord);
+        public Task CrawlAsync(WebsiteRecord record, Execution execution);
 
     }
 }

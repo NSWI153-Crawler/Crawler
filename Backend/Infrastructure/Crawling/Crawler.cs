@@ -13,7 +13,7 @@ using HtmlAgilityPack;
 
 namespace Infrastructure.Crawling
 {
-   public class Crawler(ICrawlNodeRepository crawlNodeRepository, IExecutionRepository executionRepository)
+   public class Crawler(ICrawlNodeRepository crawlNodeRepository, IExecutionRepository executionRepository) : ICrawler
    {
     private readonly HttpClient _httpClient = new();
     public async Task CrawlAsync(WebsiteRecord record, Execution execution)
@@ -21,7 +21,6 @@ namespace Infrastructure.Crawling
         try
         {
             execution.StartTime = DateTime.UtcNow;
-            //TODO: add InProgress execution status
             execution.Status = ExecutionStatus.InProgress;
             await executionRepository.UpdateAsync(execution.Id,execution);
 
@@ -47,7 +46,8 @@ namespace Infrastructure.Crawling
     {
         if (!IsWithinBoundary(url, record.BoundaryRegexp))
             return null;
-
+        // TODO, to se mi nejak nezda, crawl page by meli byt navazane na website record spis nez na execution
+        // mozna by bylo fajn ty puvodni vymazat, nez se zacne crawlovat znovu? A tady pak misto Execution id pouzit website record id
         var existingNode = await crawlNodeRepository.GetByUrlAndExecutionIdAsync(url, execution.Id);
         if (existingNode != null)
             return existingNode;
@@ -59,7 +59,7 @@ namespace Infrastructure.Crawling
         {
             Id = Guid.NewGuid(),
             Url = url,
-            CrawlTime = (int)DateTime.UtcNow.Ticks,
+            CrawlTime = DateTime.UtcNow,
             Title = ExtractTitle(content),
             OwnerId = record.Id,
             Owner = record,
@@ -67,7 +67,6 @@ namespace Infrastructure.Crawling
             ParentNode = parentNode,
             CrawlNodes = new List<CrawlNode>()
         };
-        //TODO: implement AddAsync for CrawlNodes
         await crawlNodeRepository.AddAsync(crawlNode);
         execution.SitesCrawled++;
         await executionRepository.UpdateAsync(execution.Id,execution);
@@ -94,7 +93,6 @@ namespace Infrastructure.Crawling
                 await CrawlRecursivelyAsync(childNode, record, execution);
             }
         }
-        //TODO: implement UpdateAsync for CrawlNodes
         await crawlNodeRepository.UpdateAsync(node);
     }
 

@@ -29,7 +29,7 @@ namespace Api.Controllers
             var result = new List<WebsiteRecordDto>();
             foreach(var websiteRecord in domain)
             {
-                var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(websiteRecord);
+                var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(websiteRecord.Id);
                 var lastExecutionDto = mapper.Map<ExecutionDto?>(lastExecution);
                 var websiteRecordDto = mapper.Map<WebsiteRecordDto>(websiteRecord);
                 result.Add(WebsiteRecordDto.AddLastExecution(websiteRecordDto, lastExecutionDto));
@@ -45,7 +45,7 @@ namespace Api.Controllers
             {
                 return NotFound();
             }
-            var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(domain);
+            var lastExecution = executionRepository.GetLastExecutionFromWebsiteRecord(domain.Id);
             var lastExecutionDto = mapper.Map<ExecutionDto?>(lastExecution);
             var websiteRecordDto = mapper.Map<WebsiteRecordDto>(domain);
 

@@ -10,7 +10,8 @@ namespace Domain.Entities
     public enum ExecutionStatus
     {
         Success,
-        Failure
+        Failure,
+        InProgress
     }
     public class Execution : IEntity
     {

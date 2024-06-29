@@ -43,14 +43,19 @@ namespace Infrastructure.Persistence.Repositories
             return await dbContext.Executions.ToListAsync();
         }
 
+        public async Task<IEnumerable<Execution?>> GetAllExecutionsFromWebsiteRecord(Guid websiteRecordId)
+        {
+            return await dbContext.Executions.Where(x => x.WebsiteRecord.Id == websiteRecordId).ToListAsync();
+        }
+
         public async Task<Execution?> GetByIdAsync(Guid id)
         {
             return await dbContext.Executions.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Execution?> GetLastExecutionFromWebsiteRecord(WebsiteRecord websiteRecord)
+        public async Task<Execution?> GetLastExecutionFromWebsiteRecord(Guid websiteRecordId)
         {
-            List<Execution> executions = await dbContext.Executions.Where(x => x.WebsiteRecord.Id == websiteRecord.Id).ToListAsync();
+            List<Execution> executions = await dbContext.Executions.Where(x => x.WebsiteRecord.Id == websiteRecordId).ToListAsync();
             if(executions.Count == 0)
             {
                 // no executions yet for this website record

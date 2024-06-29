@@ -41,6 +41,10 @@ namespace Infrastructure.Persistence.Repositories
             return existingWebsiteRecord;
         }
 
+        public async Task<IEnumerable<WebsiteRecord>> GetActiveRecordsAsync()
+        {
+            return await dbContext.WebsiteRecords.Include(x => x.Tags).Where(x => x.State == State.Active).ToListAsync();
+        }
 
         public async Task<List<WebsiteRecord>> GetAllAsync()
         {

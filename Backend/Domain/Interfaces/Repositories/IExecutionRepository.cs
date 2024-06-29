@@ -14,6 +14,8 @@ namespace Domain.Interfaces.Repositories
         public Task<Execution> CreateAsync(Execution execution);
         public Task<Execution?> UpdateAsync(Guid id, Execution execution);
         public Task<Execution?> DeleteAsync(Guid id);
-        public Task<Execution?> GetLastExecutionFromWebsiteRecord(WebsiteRecord websiteRecord);
+        public Task<Execution?> GetLastExecutionFromWebsiteRecord(Guid websiteRecordId);
+        public Task<IEnumerable<Execution?>> GetAllExecutionsFromWebsiteRecord(Guid websiteRecordId);
+        
     }
 }
