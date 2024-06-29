@@ -4,6 +4,7 @@ using Domain.Interfaces.Repositories;
 using Infrastructure;
 using DotNetEnv;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Crawling;
 
 var builder = WebApplication.CreateBuilder(args);
 
