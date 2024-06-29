@@ -20,6 +20,10 @@ export default {
         'dark-fg': '#fff',
         'light-bg': '#F9FAFB',
       },
+      spacing: {
+        'component-xl': '500px',
+        'wmin': '560px',
+      },
       boxShadow: {
         'dark-glow': '0 0 40px 10px #333',
         'light-glow': '0 0 40px 10px #ccc',

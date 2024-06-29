@@ -98,13 +98,19 @@ defineExpose({
       <div
         class="z-50 bg-gray-200 dark:bg-dark-bg border-2 border-dark-bg dark:border-dark-fg rounded-2xl py-4 px-8 fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]"
       >
-        <h1 v-if="formFields.creation" class="py-2 text-xl font-bold text-center mb-4">
+        <h1
+          v-if="formFields.creation"
+          class="py-2 text-xl font-bold text-center mb-4 dark:text-dark-fg"
+        >
           Create New Record
         </h1>
         <h1 v-else class="py-2 text-xl font-bold text-center mb-4">Edit Record</h1>
         <form @submit.prevent="handleSubmit()" class="space-y-2">
           <div>
-            <label for="label" class="w-[100px] float-left" title="Name of your website record"
+            <label
+              for="label"
+              class="w-[100px] float-left dark:text-dark-fg"
+              title="Name of your website record"
               >Label:</label
             >
             <input
@@ -116,7 +122,9 @@ defineExpose({
             />
           </div>
           <div>
-            <label for="url" class="w-[100px] float-left" title="Starting URL">URL:</label>
+            <label for="url" class="w-[100px] float-left dark:text-dark-fg" title="Starting URL"
+              >URL:</label
+            >
             <input
               type="text"
               id="url"
@@ -128,7 +136,7 @@ defineExpose({
           <div>
             <label
               for="regex"
-              class="w-[100px] float-left"
+              class="w-[100px] float-left dark:text-dark-fg"
               title="May restrict what pages should be crawled"
               >RegEx:</label
             >
@@ -141,7 +149,10 @@ defineExpose({
             />
           </div>
           <div>
-            <label for="tags" class="w-[100px] float-left" title="Separate tags with a comma"
+            <label
+              for="tags"
+              class="w-[100px] float-left dark:text-dark-fg"
+              title="Separate tags with a comma"
               >Tags: ⓘ</label
             >
             <input
@@ -155,7 +166,7 @@ defineExpose({
           <div>
             <label
               for="periodicity"
-              class="w-[100px] float-left"
+              class="w-[100px] float-left dark:text-dark-fg"
               title="How often is record executed"
               >Periodicity:</label
             >
@@ -167,7 +178,7 @@ defineExpose({
               class="rounded text-black pl-1 w-10"
               v-model="formFields.periodicity"
             />
-            /day
+            <span class="ml-1 dark:text-dark-fg">/day</span>
           </div>
           <!-- status buttons container -->
           <div class="flex space-x-1 pr-4">

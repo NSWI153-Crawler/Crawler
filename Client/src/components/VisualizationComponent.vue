@@ -331,7 +331,7 @@ watch(
 
 <template>
   <div class="bg-white dark:bg-dark-bg">
-    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
+    <div class="w-component-xl select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
         :class="[isExpanded ? 'transform rotate-180' : '']"
@@ -341,7 +341,7 @@ watch(
     <div v-if="isExpanded">
       <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
       <!-- bar holding top buttons -->
-      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+      <div class="mx-auto my-4">
         <!-- view buttons container-->
         <div class="pl-4 float-left">
           <div class="toggle-container">
@@ -393,7 +393,7 @@ watch(
 
       <!-- graph container -->
       <div
-        class="w-1/2 min-w-[500px] bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"
+        class="w-1/2 min-w-component-xl bg-white border border-black rounded-lg overflow-hidden relative mx-auto h-[500px]"
       >
         <v-network-graph
           class="graph"
@@ -440,7 +440,7 @@ watch(
       </div>
 
       <!-- bar holding bottom buttons -->
-      <div class="w-1/2 min-w-[500px] mx-auto my-4">
+      <div class="w-1/2 min-w-component-xl mx-auto my-4">
         <!-- layout buttons container -->
         <div class="flex space-x-1 pr-4 justify-center">
           <div class="p-1 select-none cursor-default dark:text-dark-fg">Layout:</div>

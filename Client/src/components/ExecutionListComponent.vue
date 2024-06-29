@@ -116,8 +116,6 @@ const onClickOutside = (event: MouseEvent) => {
   if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
 }
 
-const executionList = ref()
-
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
 })
@@ -134,15 +132,15 @@ watch(filteredExecutions, () => {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-dark-bg" ref="executionList">
-    <div class="min-w-[500px] select-none cursor-pointer" @click="isExpanded = !isExpanded">
+  <div class="bg-white dark:bg-dark-bg">
+    <div class="w-component-xl select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
         :class="[isExpanded ? 'transform rotate-180' : '']"
       />
       <h1 class="text-2xl text-center dark:text-dark-fg">Executions Log</h1>
     </div>
-    <div v-if="isExpanded">
+    <div v-if="isExpanded" class="w-component-xl">
       <hr class="mt-2 border-dark-bg dark:border-dark-fg" />
       <div id="dropdown" class="w-64 relative mx-auto my-4">
         <div @click="showCheckboxes" class="cursor-pointer relative">
@@ -176,7 +174,7 @@ watch(filteredExecutions, () => {
         </div>
       </div>
 
-      <div class="min-w-[500px] h-[500px]">
+      <div class="w-component-xl h-[500px]">
         <table class="table-auto w-full dark:text-dark-fg">
           <thead class="text-left">
             <tr>

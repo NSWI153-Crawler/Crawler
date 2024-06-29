@@ -204,7 +204,7 @@ const records = reactive([
 </script>
 
 <template>
-  <div>
+  <div class="min-w-wmin">
     <h1 class="text-4xl font-bold text-center mt-8">Website Records</h1>
     <div class="flex justify-center my-4">
       <button
