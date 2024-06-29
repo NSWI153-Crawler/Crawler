@@ -5,15 +5,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Infrastructure.Crawling
 {
-    public class Crawler : ICrawler
+    public class Crawler
     {
-        public Task<Execution> CrawlWebsiteRecord(WebsiteRecord websiteRecord)
+        public async Task CrawlAsync(WebsiteRecord record, Execution execution)
         {
-            throw new NotImplementedException();
+
         }
 
+        private string ExtractTitle(string content)
+        {
+            // Implement title extraction logic
+            return null;
+        }
+
+        private List<string> ExtractLinks(string content)
+        {
+            // Implement link extraction logic
+            return null;
+        }
     }
 }
