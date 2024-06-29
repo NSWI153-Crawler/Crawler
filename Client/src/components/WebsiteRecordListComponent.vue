@@ -33,13 +33,6 @@ const pageSize = ref(8)
 const filter = ref({ url: '', label: '', tag: '' })
 const sort = ref('url')
 
-async function activateRecord(id: string, isActive: boolean) {
-  //onclick status, TODO: remove?
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-  if (!records.find((record) => record.id === id)) return
-  records.find((record) => record.id === id)!.isActive = isActive
-}
-
 async function deleteRecord(id: string) {
   await store.deleteRecord(id.toString()).then(() => {
     //TODO do at store
@@ -207,7 +200,6 @@ const records = reactive([
     isActive: true,
     addedToGraph: false
   }
-  // TODO: communication with server
 ])
 </script>
 
@@ -361,18 +353,17 @@ const records = reactive([
           <div class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
             <div class="flex space-x-1 pr-4">
               <strong class="dark:text-dark-fg">Status:</strong>
-              <div @click="activateRecord(record.id, !record.isActive)">
-                <a class="cursor-pointer">{{ record.isActive ? 'active' : 'inactive' }}</a>
+              <div>
+                {{ record.isActive ? 'active' : 'inactive' }}
               </div>
-              <button
+              <div
                 class="flex justify-center content-center align-middle w-4 h-4 border-none rounded-[50%] bg-white dark:bg-dark-bg mt-[6px] overflow-auto"
-                @click="activateRecord(record.id, !record.isActive)"
               >
                 <span
                   class="rounded-full m-auto"
                   :class="[record.isActive ? 'shadow-green-light' : 'shadow-red-light']"
                 />
-              </button>
+              </div>
             </div>
           </div>
 
