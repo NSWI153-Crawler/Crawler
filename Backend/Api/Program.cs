@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowSpecificOrigins",
@@ -23,11 +24,11 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
+
 builder.Services.AddControllers();
 DotNetEnv.Env.Load();
 
 builder.Services.AddInfrastructure(); // This method should register infrastructure services
-
 
 // Register other necessary services for ExecutionQueueService
 builder.Services.AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
@@ -56,6 +57,9 @@ app.UseSwaggerUI();
 
 app.UseGraphQL<ISchema>();
 app.UseGraphQLPlayground("/playground", new GraphQL.Server.Ui.Playground.PlaygroundOptions());
+
+app.UseCors("MyAllowSpecificOrigins");
+
 
 app.UseHttpsRedirection();
 
