@@ -14,7 +14,7 @@ namespace Api.Mappings
             CreateMap<Tag, TagDto>().ReverseMap();
             CreateMap<Execution, ExecutionDto>().ReverseMap();
             CreateMap<Execution, CreateExecutionRequest>().ReverseMap();
-            CreateMap<Execution,  UpdateExecutionRequest>().ReverseMap();
+            CreateMap<Execution, UpdateExecutionRequest>().ReverseMap();
         }
     }
 }
