@@ -82,6 +82,8 @@ namespace Api.Controllers
             return Ok();
         }
         [HttpPut]
+        [Route("{id:Guid}")]
+
         public async Task<IActionResult> Put(Guid id, UpdateWebsiteRecordRequest request)
         {
             var domain = mapper.Map<WebsiteRecord>(request);
