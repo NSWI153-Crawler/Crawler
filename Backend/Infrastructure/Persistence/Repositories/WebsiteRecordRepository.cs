@@ -56,6 +56,12 @@ namespace Infrastructure.Persistence.Repositories
             return await dbContext.WebsiteRecords.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<IEnumerable<CrawlNode>> GetNodes(Guid websiteRecordId)
+        {
+            var websiteRecord = await dbContext.WebsiteRecords.Include(x => x.CrawlNodes).FirstOrDefaultAsync(x => x.Id == websiteRecordId);
+            return websiteRecord.CrawlNodes;
+        }
+
         public async Task<WebsiteRecord?> UpdateAsync(Guid id, WebsiteRecord record)
         {
             var existingWebsiteRecord = await dbContext.WebsiteRecords.FirstOrDefaultAsync(x => x.Id == id);

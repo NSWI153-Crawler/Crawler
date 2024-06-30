@@ -16,5 +16,6 @@ namespace Domain.Interfaces.Repositories
         public Task<WebsiteRecord?> UpdateAsync(Guid id, WebsiteRecord websiteRecord);
         public Task<WebsiteRecord?> DeleteAsync(Guid id);
         Task<IEnumerable<WebsiteRecord>> GetActiveRecordsAsync();
+        Task<IEnumerable<CrawlNode>> GetNodes(Guid websiteRecordId);
     }
 }
