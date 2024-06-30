@@ -8,6 +8,8 @@ using Infrastructure.Crawling;
 using Api.GraphQL;
 using GraphQL;
 using GraphQL.Types;
+using Microsoft.Extensions.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -25,14 +27,13 @@ builder.Services.AddScoped<ExecutionManager>();
 builder.Services.AddHostedService<ExecutionQueueService>();
 
 //graphql service
-builder.Services.AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
-builder.Services.AddScoped<ICrawlNodeRepository, CrawlNodeRepository>();
-builder.Services.AddScoped<IExecutionRepository, ExecutionRepository>();
-
 builder.Services.AddScoped<AppQuery>();
 builder.Services.AddScoped<WebsiteRecordType>();
 builder.Services.AddScoped<CrawlNodeType>();
 builder.Services.AddScoped<ISchema, AppSchema>();
+builder.Services.AddGraphQL(builder => builder
+    .AddSystemTextJson() 
+    );
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -45,7 +46,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseGraphQL<ISchema>();
-app.UseGraphQLPlayground();
+app.UseGraphQLPlayground("/playground", new GraphQL.Server.Ui.Playground.PlaygroundOptions());
 
 app.UseHttpsRedirection();
 
