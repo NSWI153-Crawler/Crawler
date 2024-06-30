@@ -8,22 +8,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.DependencyInjection;
 namespace Infrastructure.Crawling
 {
     public class ExecutionQueueService : BackgroundService
     {
-        private readonly IWebsiteRecordRepository _websiteRecordRepository;
-        private readonly ExecutionManager _executionManager;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<ExecutionQueueService> _logger;
 
         public ExecutionQueueService(
-            IWebsiteRecordRepository websiteRecordRepository,
-            ExecutionManager executionManager,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<ExecutionQueueService> logger)
         {
-            _websiteRecordRepository = websiteRecordRepository;
-            _executionManager = executionManager;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -35,19 +32,25 @@ namespace Infrastructure.Crawling
                 {
                     _logger.LogInformation("Checking for website records to execute at: {time}", DateTimeOffset.Now);
                     
-                    var activeRecords = await _websiteRecordRepository.GetActiveRecordsAsync();
-                    foreach (var record in activeRecords)
+                    using (var scope = _serviceScopeFactory.CreateScope())
                     {
-                        if (await ShouldExecuteAsync(record))
+                        var websiteRecordRepository = scope.ServiceProvider.GetRequiredService<IWebsiteRecordRepository>();
+                        var executionManager = scope.ServiceProvider.GetRequiredService<ExecutionManager>();
+
+                        var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
+                        foreach (var record in activeRecords)
                         {
-                            try
+                            if (await ShouldExecuteAsync(record, executionManager))
                             {
-                                await _executionManager.StartExecutionAsync(record.Id);
-                                _logger.LogInformation("Started execution for website record: {recordId}", record.Id);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error starting execution for website record: {recordId}", record.Id);
+                                try
+                                {
+                                    await executionManager.StartExecutionAsync(record.Id);
+                                    _logger.LogInformation("Started execution for website record: {recordId}", record.Id);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Error starting execution for website record: {recordId}", record.Id);
+                                }
                             }
                         }
                     }
@@ -64,14 +67,14 @@ namespace Infrastructure.Crawling
             }
         }
 
-        private async Task<bool> ShouldExecuteAsync(WebsiteRecord record)
+        private async Task<bool> ShouldExecuteAsync(WebsiteRecord record, ExecutionManager executionManager)
         {
             if (record.State != State.Active)
             {
                 return false;
             }
 
-            var lastExecution = await _executionManager.GetLastExecutionFromWebsiteRecord(record);
+            var lastExecution = await executionManager.GetLastExecutionFromWebsiteRecord(record);
             if (lastExecution == null)
             {
                 return true; // No previous execution, should execute
@@ -82,3 +85,4 @@ namespace Infrastructure.Crawling
         }
     }
 }
+
