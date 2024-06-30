@@ -40,7 +40,7 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<List<Execution>> GetAllAsync()
         {
-            return await dbContext.Executions.ToListAsync();
+            return await dbContext.Executions.Include(x => x.WebsiteRecord).ToListAsync();
         }
 
         public async Task<IEnumerable<Execution?>> GetAllExecutionsFromWebsiteRecord(Guid websiteRecordId)
@@ -50,7 +50,7 @@ namespace Infrastructure.Persistence.Repositories
 
         public async Task<Execution?> GetByIdAsync(Guid id)
         {
-            return await dbContext.Executions.FirstOrDefaultAsync(x => x.Id == id);
+            return await dbContext.Executions.Include(x => x.WebsiteRecord).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<Execution?> GetLastExecutionFromWebsiteRecord(Guid websiteRecordId)
@@ -71,7 +71,7 @@ namespace Infrastructure.Persistence.Repositories
             {
                 return null;
             }
-            if (execution.StartTime > execution.EndTime) throw new ArgumentException("Start time must be sooner than end time.");
+            if (execution.StartTime > execution.EndTime);
             existingExecution.StartTime = execution.StartTime;
             existingExecution.EndTime = execution.EndTime;
             existingExecution.SitesCrawled = execution.SitesCrawled;

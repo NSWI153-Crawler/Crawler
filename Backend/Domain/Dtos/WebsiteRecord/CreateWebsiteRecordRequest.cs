@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Domain.Entities;
+using System.Text.RegularExpressions;
 
 namespace Domain.Dtos
 {
@@ -8,6 +9,8 @@ namespace Domain.Dtos
         public string BoundaryRegexp { get; set; }
         public int Periodicity { get; set; }
         public string Label { get; set; }
+        public State State { get; set; }
+
         public List<TagDto> Tags { get; set; }
     }
 }

@@ -74,6 +74,7 @@ namespace Infrastructure.Persistence.Repositories
             existingWebsiteRecord.BoundaryRegexp = record.BoundaryRegexp;
             existingWebsiteRecord.Tags = record.Tags; // todo maybe check, that this does what it should
             existingWebsiteRecord.Periodicity = record.Periodicity;
+            existingWebsiteRecord.State = record.State;
             await dbContext.SaveChangesAsync();
             return existingWebsiteRecord;
         }
