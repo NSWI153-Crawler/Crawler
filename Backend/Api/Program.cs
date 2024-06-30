@@ -5,7 +5,9 @@ using Infrastructure;
 using DotNetEnv;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Crawling;
-
+using Api.GraphQL;
+using GraphQL;
+using GraphQL.Types;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,6 +23,17 @@ builder.Services.AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
 builder.Services.AddScoped<ExecutionManager>();
 // Register the ExecutionQueueService
 builder.Services.AddHostedService<ExecutionQueueService>();
+
+//graphql service
+builder.Services.AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
+builder.Services.AddScoped<ICrawlNodeRepository, CrawlNodeRepository>();
+builder.Services.AddScoped<IExecutionRepository, ExecutionRepository>();
+
+builder.Services.AddScoped<AppQuery>();
+builder.Services.AddScoped<WebsiteRecordType>();
+builder.Services.AddScoped<CrawlNodeType>();
+builder.Services.AddScoped<ISchema, AppSchema>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -30,6 +43,9 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseGraphQL<ISchema>();
+app.UseGraphQLPlayground();
 
 app.UseHttpsRedirection();
 
