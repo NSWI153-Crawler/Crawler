@@ -29,6 +29,7 @@
 ## Deployment
 After cloning the repository, run the following command to deploy the application:
 ```docker compose up --build```
+
 The ```--build``` option is necessary only during the first deployment. 
 
 
@@ -40,7 +41,7 @@ The Backend services are running on port **8080**.
 ### GraphQL
 Click the following [link](http://localhost:8080/playground) to visit the GraphQL playground.
 
-###Swagger
+### Swagger
 Swagger is accesible at the following [link]( http://localhost:8080/swagger/index.html).
 
 ### Frontend
