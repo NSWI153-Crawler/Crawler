@@ -32,6 +32,7 @@ function hideForm() {
 }
 
 async function handleSubmit() {
+  hideForm()
   if (formFields.creation) {
     await store.createRecord(
       formFields.url,
@@ -52,7 +53,6 @@ async function handleSubmit() {
       formFields.tags.split(/[,\s]+/)
     )
   }
-  hideForm()
 }
 
 function showCreationForm(url: string = '') {
@@ -117,6 +117,7 @@ defineExpose({
               type="text"
               id="label"
               name="label"
+              required
               class="rounded text-black pl-1"
               v-model="formFields.label"
             />
@@ -129,6 +130,7 @@ defineExpose({
               type="text"
               id="url"
               name="url"
+              required
               class="rounded text-black pl-1"
               v-model="formFields.url"
             />
@@ -167,18 +169,19 @@ defineExpose({
             <label
               for="periodicity"
               class="w-[100px] float-left dark:text-dark-fg"
-              title="How often is record executed"
+              title="How often is the record executed"
               >Periodicity:</label
             >
+            <span class="mr-1 dark:text-dark-fg">Every</span>
             <input
               type="number"
               id="periodicity"
               name="periodicity"
               min="0"
-              class="rounded text-black pl-1 w-10"
+              class="rounded text-black pl-1 w-16 text-right"
               v-model="formFields.periodicity"
             />
-            <span class="ml-1 dark:text-dark-fg">/day</span>
+            <span class="ml-1 dark:text-dark-fg">minutes.</span>
           </div>
           <!-- status buttons container -->
           <div class="flex space-x-1 pr-4">

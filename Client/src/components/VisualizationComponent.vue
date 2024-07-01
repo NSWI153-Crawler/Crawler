@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as vNG from 'v-network-graph'
+import type { WebsiteRecord } from '@/stores/records'
 import {
   computed,
   nextTick,
@@ -33,7 +34,7 @@ interface Node extends vNG.Node {
   crawled: boolean
   title?: string
   crawledTime?: string
-  websiteRecords?: string[]
+  websiteRecords?: WebsiteRecord[]
 }
 type NodePlaceHolder = [string, boolean]
 
@@ -42,27 +43,50 @@ interface Edge extends vNG.Edge {
 }
 type EdgePlaceHolder = [string, string]
 
-const nodes: Record<string, Node> = reactive({
+const nodes: Record<string, Node> = reactive({ // TODO: replace with real data
   node1: {
     name: 'example.com',
     crawled: true,
     title: 'example.com',
     crawledTime: '2021-10-02T13:00:00Z',
-    websiteRecords: ['Record', 'Example']
+    websiteRecords: []
   },
   node2: {
     name: 'http://example.com/home',
     crawled: true,
     title: 'Example',
     crawledTime: '2021-10-02T13:00:00Z',
-    websiteRecords: ['Record', 'Example']
+    websiteRecords: [
+      {
+        id: "record1",
+        url: "http://example.com",
+        regexp: ".*",
+        periodicity: 60,
+        label: "Example Record",
+        isActive: true,
+        tags: ["tag1", "tag2"],
+        lastExecutionTime: "2021-10-02T13:00:00Z",
+        lastExecutionStatus: "Success"
+      },
+      {
+        id: "record2",
+        url: "http://example.com/page",
+        regexp: ".*",
+        periodicity: 120,
+        label: "Example Record 2",
+        isActive: false,
+        tags: ["tag3", "tag4"],
+        lastExecutionTime: "2021-10-02T14:00:00Z",
+        lastExecutionStatus: "Failure"
+      }
+    ]
   },
   node3: {
     name: 'https://exam.com/info',
     crawled: true,
     title: 'Exam',
     crawledTime: '2021-10-02T13:00:00Z',
-    websiteRecords: ['Record', 'Example']
+    websiteRecords: []
   },
   node4: { name: 'https://www.exampl.com/about', crawled: false },
   node5: { name: 'example.com/contact', crawled: false }
@@ -182,10 +206,9 @@ const nodeSize = 40
 function toggleMode(mode: 'static' | 'live') {
   if (mode === modeToggle.value) return
   modeToggle.value = mode
-  if (mode === modeStatic) {
+  if (mode === modeLive) {
     //TODO
-  } else if (mode === modeLive) {
-    //TODO
+    console.log('Live mode')
   }
 }
 
@@ -418,9 +441,8 @@ watch(
               <b>Crawled by:</b> ⓘ
             </p>
             <ul class="list-disc list-inside">
-              <!--              TODO crawl records on click; find record id by name in store?-->
-              <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record">
-                {{ record }}
+              <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record.id">
+                <a href="#" class="cursor-pointer" @click="store.runExecution(record.id!)">{{ record.label }}</a>
               </li>
             </ul>
           </div>

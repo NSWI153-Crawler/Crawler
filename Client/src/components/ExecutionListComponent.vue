@@ -1,23 +1,28 @@
 <script setup lang="ts">
 import { watch, onMounted, onUnmounted, computed, ref, defineComponent } from 'vue'
+import { useExecutionStore } from '@/stores/executions'
+
 defineComponent({
   name: 'ExecutionListComponent'
 })
 
 const isExpanded = ref(false)
+const store = useExecutionStore()
 
-const executions = ref(
-  [
-    {
-      id: 15,
-      time: '2021-10-02T13:00:00Z',
-      label: 'Record',
-      numberOfSitesCrawled: 7,
-      status: 'unknown'
-    }
-    // TODO: communication with server
-  ].map((execution) => ({ ...execution, checked: true }))
-)
+const executions = computed(() => store.executions)
+
+onMounted(() => {
+  store.fetchExecutions()
+  store.periodicalFetchExecutions()
+  document.addEventListener('click', onClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+  store.stopPeriodicalFetchExecutions()
+})
+
+
 
 const currentPage = ref(1)
 const pageSize = ref(11)
@@ -28,8 +33,8 @@ const uniqueExecutions = computed(() => {
   // used for filtering
   const uniqueLabels = new Set()
   return executions.value.filter((execution) => {
-    if (!uniqueLabels.has(execution.label)) {
-      uniqueLabels.add(execution.label)
+    if (!uniqueLabels.has(execution.recordLabel)) {
+      uniqueLabels.add(execution.recordLabel)
       return true
     }
     return false
@@ -51,10 +56,10 @@ const filteredExecutions = computed(() => {
   const checkedLabels = new Set()
   uniqueExecutions.value.forEach((execution) => {
     if (execution.checked) {
-      checkedLabels.add(execution.label)
+      checkedLabels.add(execution.recordLabel)
     }
   })
-  return sortedExecutions.value.filter((execution) => checkedLabels.has(execution.label))
+  return sortedExecutions.value.filter((execution) => checkedLabels.has(execution.recordLabel))
 })
 
 const paginatedExecutions = computed(() => {
@@ -116,14 +121,6 @@ const onClickOutside = (event: MouseEvent) => {
   if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
 }
 
-onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', onClickOutside)
-})
-
 watch(filteredExecutions, () => {
   const totalPages = Math.ceil(filteredExecutions.value.length / pageSize.value)
   if (currentPage.value > totalPages) currentPage.value = totalPages
@@ -168,7 +165,7 @@ watch(filteredExecutions, () => {
                 :id="`execution-${execution.id}`"
                 v-model="execution.checked"
               />
-              {{ execution.label }}
+              {{ execution.recordLabel }}
             </label>
           </span>
         </div>
@@ -219,23 +216,23 @@ watch(filteredExecutions, () => {
           <tbody>
             <tr v-for="execution in paginatedExecutions" :key="execution.id">
               <td class="border border-dark-bg dark:border-dark-fg px-2 py-2">
-                {{ execution.label }}
+                {{ execution.recordLabel }}
               </td>
               <td class="border border-dark-bg dark:border-dark-fg px-2 py-2">
-                {{ formatDate(execution.time) }}
+                {{ formatDate(execution.executionTime) }}
               </td>
               <td class="border border-dark-bg dark:border-dark-fg px-2 py-2 text-center">
-                {{ execution.numberOfSitesCrawled }}
+                {{ execution.sitesCrawled }}
               </td>
               <td
                 class="border border-dark-bg px-2 py-2 text-center text-dark-bg dark:border-dark-fg"
                 :class="
-                  execution.status === 'success'
+                  execution.executionStatus === 'success'
                     ? 'bg-green-400 dark:bg-[#14e414]'
                     : 'bg-[#ff0000] dark:bg-[#900] dark:text-dark-fg dark:font-bold'
                 "
               >
-                {{ execution.status }}
+                {{ execution.executionStatus }}
               </td>
             </tr>
           </tbody>

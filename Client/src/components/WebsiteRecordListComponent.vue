@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { watch, reactive, computed, onMounted, ref, defineComponent } from 'vue'
+import { watch, computed, onMounted, ref } from 'vue'
 import { useWebsiteRecordStore } from '@/stores/records'
 import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
 
 const store = useWebsiteRecordStore()
-
-const fetchRecords = async () => {
-  await store.fetchRecords()
-}
-
-// onMounted(fetchRecords)
 
 const formComponent: any = ref(null)
 const showCreateForm = () => {
@@ -33,20 +27,10 @@ const pageSize = ref(8)
 const filter = ref({ url: '', label: '', tag: '' })
 const sort = ref('url')
 
-async function deleteRecord(id: string) {
-  await store.deleteRecord(id.toString()).then(() => {
-    //TODO do at store
-    records.splice(
-      records.findIndex((record) => record.id === id),
-      1
-    )
-  })
-}
-
 const totalPages = computed(() => Math.ceil(filteredRecords.value.length / pageSize.value))
 
 function sortRecords() {
-  records.sort((a, b) => {
+  records.value.sort((a, b) => {
     if (sort.value === 'url') {
       return a.url.localeCompare(b.url)
     } else if (sort.value === 'label') {
@@ -54,6 +38,8 @@ function sortRecords() {
     } else if (sort.value === 'periodicity') {
       return a.periodicity - b.periodicity
     } else if (sort.value === 'lastCrawled') {
+      if (!a.lastExecutionTime || !b.lastExecutionTime)
+        return 0
       return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
     }
     return 0
@@ -61,7 +47,7 @@ function sortRecords() {
 }
 
 const filteredRecords = computed(() => {
-  return records.filter((record) => {
+  return records.value.filter((record) => {
     const urlFilter = filter.value.url ? record.url.includes(filter.value.url) : true
     const labelFilter = filter.value.label ? record.label.includes(filter.value.label) : true
     const tagsFilter =
@@ -78,129 +64,11 @@ const paginatedRecords = computed(() => {
 
 watch(() => sort.value, sortRecords)
 
-//const records = computed(() => store.records) //TODO: uncomment
-const records = reactive([
-  {
-    id: '1',
-    url: 'https://www.google.com',
-    label: 'Google',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 1,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '2',
-    url: 'https://www.bing.com',
-    label: 'Bing',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 24,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '3',
-    url: 'https://www.yahoo.com',
-    label: 'Yahoo',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 12,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '4',
-    url: 'https://www.duckduckgo.com',
-    label: 'DuckDuckGo',
-    tags: ['search', 'engine'],
-    regexp: '.*',
-    periodicity: 1,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '5',
-    url: 'https://www.ecosia.com',
-    label: 'Ecosia',
-    tags: ['search', 'engine'],
-    regexp: '(www\\.)?ecosia\\.com/.*',
-    periodicity: 48,
-    lastExecutionTime: '2021-10-02T13:50:20Z',
-    lastExecutionStatus: 'success',
-    isActive: false,
-    addedToGraph: false
-  },
-  {
-    id: '6',
-    url: 'https://www.example.com',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '7',
-    url: 'https://www.example.org',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '8',
-    url: 'https://www.example.net',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '9',
-    url: 'https://www.example.edu',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 0,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  },
-  {
-    id: '10',
-    url: 'https://www.example.gov',
-    label: 'Example',
-    tags: ['example'],
-    regexp: '.*',
-    periodicity: 2,
-    lastExecutionTime: '2021-10-02T13:00:00Z',
-    lastExecutionStatus: 'unknown',
-    isActive: true,
-    addedToGraph: false
-  }
-])
+const records = computed(() => store.records)
+
+onMounted(() => {
+  store.fetchRecords()
+})
 </script>
 
 <template>
@@ -300,7 +168,7 @@ const records = reactive([
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-orange-500 text-black dark:bg-[#a30] dark:text-white dark:font-bold dark:hover:bg-[#e70] hover:bg-[#fd9a66]"
               @click="
                 showEditForm(
-                  record.id,
+                  record.id!,
                   record.label,
                   record.url,
                   record.regexp,
@@ -328,6 +196,7 @@ const records = reactive([
             </button>
             <button
               class="button-style border-2 border-dark-bg dark:border-dark-fg rounded bg-[#d4f] dark:bg-[#51a] dark:hover:bg-[#72e] dark:text-white dark:font-bold hover:bg-[#e6f]"
+              @click="store.runExecution(record.id!)"
             >
               Crawl
             </button>
@@ -370,7 +239,7 @@ const records = reactive([
           <div class="flex justify-center mt-6">
             <button
               class="button-style border-2 border-dark-bg rounded bg-red-700 text-white dark:border-dark-fg hover:bg-red-600 font-bold"
-              @click="deleteRecord(record.id)"
+              @click="store.deleteRecord(record.id!)"
             >
               Delete Record
             </button>

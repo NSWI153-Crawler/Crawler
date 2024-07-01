@@ -6,8 +6,8 @@ import VNetworkGraph from 'v-network-graph'
 import 'v-network-graph/lib/style.css'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
 app.use(VNetworkGraph)
-
+app.use(pinia)
 app.mount('#app')
