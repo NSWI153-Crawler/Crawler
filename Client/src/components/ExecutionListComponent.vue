@@ -22,8 +22,6 @@ onUnmounted(() => {
   store.stopPeriodicalFetchExecutions()
 })
 
-
-
 const currentPage = ref(1)
 const pageSize = ref(11)
 const sortColumn = ref('time')
@@ -175,41 +173,13 @@ watch(filteredExecutions, () => {
         <table class="table-auto w-full dark:text-dark-fg">
           <thead class="text-left">
             <tr>
-              <th class="px-2 button-style" @click="sortTable('label')">
-                Label
-                <span v-if="sortColumn === 'label'">
-                  <span v-if="sortOrder === 'asc'">↑</span>
-                  <span v-else>↓</span>
-                </span>
-                <span v-else>→</span>
-              </th>
+              <th class="px-2 button-style">Label</th>
 
-              <th class="px-2 button-style" @click="sortTable('time')">
-                Time
-                <span v-if="sortColumn === 'time'">
-                  <span v-if="sortOrder === 'asc'">↑</span>
-                  <span v-else>↓</span>
-                </span>
-                <span v-else>→</span>
-              </th>
+              <th class="px-2 button-style">Time</th>
 
-              <th class="px-2 button-style" @click="sortTable('numberOfSitesCrawled')">
-                Sites Crawled
-                <span v-if="sortColumn === 'numberOfSitesCrawled'">
-                  <span v-if="sortOrder === 'asc'">↑</span>
-                  <span v-else>↓</span>
-                </span>
-                <span v-else>→</span>
-              </th>
+              <th class="px-2 button-style">Sites Crawled</th>
 
-              <th class="px-2 button-style" @click="sortTable('status')">
-                Status
-                <span v-if="sortColumn === 'status'">
-                  <span v-if="sortOrder === 'asc'">↑</span>
-                  <span v-else>↓</span>
-                </span>
-                <span v-else>→</span>
-              </th>
+              <th class="px-2 button-style">Status</th>
             </tr>
           </thead>
 

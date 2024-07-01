@@ -21,8 +21,12 @@ function transformExecutionFromData(data: any): Execution {
     recordId: data.websiteRecord.id,
     recordLabel: data.websiteRecord.label,
     executionTime: data.startTime,
-    executionStatus: data.executionStatus === 0 ? 'Success' :
-      data.executionStatus === 1 ? 'Failure' : 'In Progress',
+    executionStatus:
+      data.executionStatus === 0
+        ? 'Success'
+        : data.executionStatus === 1
+          ? 'Failure'
+          : 'In Progress',
     sitesCrawled: data.sitesCrawled,
     checked: true
   }
@@ -38,47 +42,57 @@ export const useExecutionStore = defineStore('execution', () => {
   const fetchExecutions = async () => {
     const response = await fetch(`${serverUrl}/api/Execution`)
     const data = await response.json()
-    console.log(data)
-    data.map((execution: any) => transformExecutionFromData(execution))
-    executions.value = data
-    console.log(data)
+    const newExecutions: Array<Execution> = data.map((execution: any) =>
+      transformExecutionFromData(execution)
+    )
+    executions.value = newExecutions
   }
 
-  let continueFetching;
+  let continueFetching
 
   const periodicalFetchExecutions = async () => {
-    continueFetching = true;
+    continueFetching = true
     while (continueFetching) {
       const response = await fetch(`${serverUrl}/api/Execution`)
       const data = await response.json()
-      data.map((execution: any) => transformExecutionFromData(execution))
+      const newExecutions = data.map((execution: any) => transformExecutionFromData(execution))
 
-      for (const execution of data) {
+      for (const execution of newExecutions) {
         if (!executions.value.find((e: Execution) => e.id === execution.id)) {
           // If the execution is newly created
-          const record = websiteRecords.value.find((r: WebsiteRecord) => r.id === execution.recordId)
-          if (record && (!record.lastExecutionTime || record.lastExecutionTime < execution.executionTime)) {
+          const record = websiteRecords.value.find(
+            (r: WebsiteRecord) => r.id === execution.recordId
+          )
+          if (
+            record &&
+            (!record.lastExecutionTime || record.lastExecutionTime < execution.executionTime)
+          ) {
             // Update the last execution time and status of the record
-            websiteRecordStore.changeExecutionTimeStatus(record.id!, execution.executionTime, execution.executionStatus)
+            websiteRecordStore.changeExecutionTimeStatus(
+              record.id!,
+              execution.executionTime,
+              execution.executionStatus
+            )
           }
-          executions.value.push(execution)
         }
       }
-      await new Promise(resolve => setTimeout(resolve, 5000))
+      executions.value = newExecutions
+      await new Promise((resolve) => setTimeout(resolve, 5000))
     }
   }
 
   const stopPeriodicalFetchExecutions = () => {
-    continueFetching = false;
+    continueFetching = false
   }
 
   // Getters
-  // const getExecutions = computed(() => executions.value)
+  const getExecutions = computed(() => executions.value)
 
   return {
     fetchExecutions,
     periodicalFetchExecutions,
     stopPeriodicalFetchExecutions,
+    getExecutions,
     executions
   }
 })

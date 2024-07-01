@@ -9,8 +9,8 @@ export interface WebsiteRecord {
   label: string
   isActive: boolean
   tags: string[]
-  lastExecutionTime?: string|null
-  lastExecutionStatus?: string|null
+  lastExecutionTime?: string | null
+  lastExecutionStatus?: string | null
   addedToGraph?: boolean
 }
 
@@ -22,11 +22,16 @@ function transformWebsiteRecordFromData(data: any): WebsiteRecord {
     periodicity: data.periodicity,
     label: data.label,
     isActive: data.state === 0,
-    tags: data.tags.map((obj: { name: string }) => obj['name']),
+    tags: data['tags'].map((tag: any) => tag.name),
     lastExecutionTime: data.lastExecution?.startTime,
-    lastExecutionStatus: data.lastExecution?.status === 0 ? 'Success' :
-      data.lastExecution?.status === 1 ? 'Failure' :
-      data.lastExecution?.status === 2 ? 'In Progress' : null,
+    lastExecutionStatus:
+      data.lastExecution?.status === 0
+        ? 'Success'
+        : data.lastExecution?.status === 1
+          ? 'Failure'
+          : data.lastExecution?.status === 2
+            ? 'In Progress'
+            : null,
     addedToGraph: false
   }
 }
@@ -52,8 +57,10 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
   const fetchRecords = async () => {
     const response = await fetch(`${serverUrl}/api/WebsiteRecord`)
     const data = await response.json()
-    data.map((record: any) => transformWebsiteRecordFromData(record))
-    records.value = data
+    const newRecords: Array<WebsiteRecord> = data.map((record: any) =>
+      transformWebsiteRecordFromData(record)
+    )
+    records.value = newRecords
   }
 
   const createRecord = async (
@@ -80,7 +87,8 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
       body: JSON.stringify(transformWebsiteRecordToData(record))
     })
     const data = await response.json()
-    records.value.push(data)
+    const newRecord = transformWebsiteRecordFromData(data)
+    records.value.push(newRecord)
   }
 
   const updateRecord = async (
@@ -95,46 +103,39 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
     if (!records.value.find((record) => record.id === id)) {
       return
     }
-    const updatedRecord = {
+    const updatedRecord = transformWebsiteRecordToData({
       url,
       regexp,
       periodicity,
       label,
       isActive,
       tags
-    }
+    })
+    console.log(JSON.stringify(updatedRecord))
     await fetch(`${serverUrl}/api/WebsiteRecord/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(transformWebsiteRecordToData(updatedRecord))
+      body: JSON.stringify(updatedRecord)
     })
-      .then(() => {
-        const index = records.value.findIndex((record) => record.id === id)
-        if (index !== -1) {
-          records.value[index].url = url
-          records.value[index].regexp = regexp
-          records.value[index].periodicity = periodicity
-          records.value[index].label = label
-          records.value[index].isActive = isActive
-          records.value[index].tags = tags
-        }
-      })
-    // const data = await response.json()
-    // const index = records.value.findIndex((record) => record.id === id)
-    // if (index !== -1) {
-    //   records.value[index] = transformWebsiteRecordFromData(data)
-    // }
+    const index = records.value.findIndex((record) => record.id === id)
+    if (index !== -1) {
+      records.value[index].url = url
+      records.value[index].regexp = regexp
+      records.value[index].periodicity = periodicity
+      records.value[index].label = label
+      records.value[index].isActive = isActive
+      records.value[index].tags = tags
+    }
   }
 
   const deleteRecord = async (id: string) => {
     await fetch(`${serverUrl}/api/WebsiteRecord/${id}`, {
       method: 'DELETE'
+    }).then(() => {
+      records.value = records.value.filter((record) => record.id !== id)
     })
-      .then(() => {
-        records.value = records.value.filter((record) => record.id !== id)
-      })
   }
 
   const runExecution = async (id: string) => {
@@ -143,16 +144,17 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
     })
   }
 
-  const changeExecutionTimeStatus = (id: string, executionTime: string, executionStatus: string) => {
+  const changeExecutionTimeStatus = (
+    id: string,
+    executionTime: string,
+    executionStatus: string
+  ) => {
     const index = records.value.findIndex((record) => record.id === id)
     if (index !== -1) {
       records.value[index].lastExecutionTime = executionTime
       records.value[index].lastExecutionStatus = executionStatus
     }
   }
-
-  // Getters
-  //const getRecords = computed(() => records.value)
 
   return {
     fetchRecords,

@@ -32,7 +32,6 @@ function hideForm() {
 }
 
 async function handleSubmit() {
-  hideForm()
   if (formFields.creation) {
     await store.createRecord(
       formFields.url,
@@ -53,6 +52,7 @@ async function handleSubmit() {
       formFields.tags.split(/[,\s]+/)
     )
   }
+  hideForm()
 }
 
 function showCreationForm(url: string = '') {
@@ -66,7 +66,7 @@ function showEditForm(
   label: string,
   url: string,
   regexp: string,
-  tags: string,
+  tags: string[],
   periodicity: number,
   status: boolean
 ) {
@@ -75,7 +75,7 @@ function showEditForm(
   formFields.label = label
   formFields.url = url
   formFields.regexp = regexp
-  formFields.tags = tags
+  formFields.tags = tags.join(', ')
   formFields.periodicity = periodicity
   formFields.status = status
   showForm.value = true

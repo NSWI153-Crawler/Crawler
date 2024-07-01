@@ -43,7 +43,8 @@ interface Edge extends vNG.Edge {
 }
 type EdgePlaceHolder = [string, string]
 
-const nodes: Record<string, Node> = reactive({ // TODO: replace with real data
+const nodes: Record<string, Node> = reactive({
+  // TODO: replace with real data
   node1: {
     name: 'example.com',
     crawled: true,
@@ -58,26 +59,26 @@ const nodes: Record<string, Node> = reactive({ // TODO: replace with real data
     crawledTime: '2021-10-02T13:00:00Z',
     websiteRecords: [
       {
-        id: "record1",
-        url: "http://example.com",
-        regexp: ".*",
+        id: 'record1',
+        url: 'http://example.com',
+        regexp: '.*',
         periodicity: 60,
-        label: "Example Record",
+        label: 'Example Record',
         isActive: true,
-        tags: ["tag1", "tag2"],
-        lastExecutionTime: "2021-10-02T13:00:00Z",
-        lastExecutionStatus: "Success"
+        tags: ['tag1', 'tag2'],
+        lastExecutionTime: '2021-10-02T13:00:00Z',
+        lastExecutionStatus: 'Success'
       },
       {
-        id: "record2",
-        url: "http://example.com/page",
-        regexp: ".*",
+        id: 'record2',
+        url: 'http://example.com/page',
+        regexp: '.*',
         periodicity: 120,
-        label: "Example Record 2",
+        label: 'Example Record 2',
         isActive: false,
-        tags: ["tag3", "tag4"],
-        lastExecutionTime: "2021-10-02T14:00:00Z",
-        lastExecutionStatus: "Failure"
+        tags: ['tag3', 'tag4'],
+        lastExecutionTime: '2021-10-02T14:00:00Z',
+        lastExecutionStatus: 'Failure'
       }
     ]
   },
@@ -442,7 +443,9 @@ watch(
             </p>
             <ul class="list-disc list-inside">
               <li v-for="record in nodes[targetNodeId]?.websiteRecords ?? []" :key="record.id">
-                <a href="#" class="cursor-pointer" @click="store.runExecution(record.id!)">{{ record.label }}</a>
+                <a href="#" class="cursor-pointer" @click="store.runExecution(record.id!)">{{
+                  record.label
+                }}</a>
               </li>
             </ul>
           </div>

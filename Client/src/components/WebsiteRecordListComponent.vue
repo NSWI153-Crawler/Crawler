@@ -4,6 +4,7 @@ import { useWebsiteRecordStore } from '@/stores/records'
 import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
 
 const store = useWebsiteRecordStore()
+const records = computed(() => store.records)
 
 const formComponent: any = ref(null)
 const showCreateForm = () => {
@@ -38,8 +39,7 @@ function sortRecords() {
     } else if (sort.value === 'periodicity') {
       return a.periodicity - b.periodicity
     } else if (sort.value === 'lastCrawled') {
-      if (!a.lastExecutionTime || !b.lastExecutionTime)
-        return 0
+      if (!a.lastExecutionTime || !b.lastExecutionTime) return 0
       return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
     }
     return 0
@@ -62,9 +62,20 @@ const paginatedRecords = computed(() => {
   return filteredRecords.value.slice(start, end)
 })
 
-watch(() => sort.value, sortRecords)
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return ''
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit'
+  }
+  return new Date(dateString).toLocaleString('cs-CZ', options)
+}
 
-const records = computed(() => store.records)
+watch(() => sort.value, sortRecords)
 
 onMounted(() => {
   store.fetchRecords()
@@ -211,10 +222,10 @@ onMounted(() => {
             <strong>Tags:</strong> {{ record.tags.join(', ') }}
           </p>
           <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
-            <strong>Periodicity:</strong> {{ record.periodicity }} a day
+            <strong>Periodicity: </strong>Every {{ record.periodicity }} minutes
           </p>
           <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
-            <strong>Last Execution Time:</strong> {{ record.lastExecutionTime }}
+            <strong>Last Execution Time:</strong> {{ formatDate(record.lastExecutionTime) }}
           </p>
           <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
             <strong>Last Execution Status:</strong> {{ record.lastExecutionStatus }}
