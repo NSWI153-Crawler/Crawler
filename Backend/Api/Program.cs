@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowSpecificOrigins",
@@ -36,14 +35,14 @@ builder.Services.AddScoped<ExecutionManager>();
 // Register the ExecutionQueueService
 builder.Services.AddHostedService<ExecutionQueueService>();
 
-//graphql service
+// GraphQL service
 builder.Services.AddScoped<AppQuery>();
 builder.Services.AddScoped<WebsiteRecordType>();
 builder.Services.AddScoped<CrawlNodeType>();
 builder.Services.AddScoped<ISchema, AppSchema>();
 builder.Services.AddGraphQL(builder => builder
-    .AddSystemTextJson() 
-    );
+    .AddSystemTextJson()
+);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -55,16 +54,15 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseGraphQL<ISchema>();
-app.UseGraphQLPlayground("/playground", new GraphQL.Server.Ui.Playground.PlaygroundOptions());
-
-app.UseCors("MyAllowSpecificOrigins");
-
+app.UseCors("MyAllowSpecificOrigins"); // Place CORS middleware before other middleware
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseGraphQL<ISchema>();
+app.UseGraphQLPlayground("/playground", new GraphQL.Server.Ui.Playground.PlaygroundOptions());
 
 app.Run();
