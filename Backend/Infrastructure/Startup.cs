@@ -41,7 +41,8 @@ namespace Infrastructure
             ).AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>()
             .AddScoped<IExecutionRepository, ExecutionRepository>()
             .AddScoped<ICrawlNodeRepository, CrawlNodeRepository>()
-            .AddScoped<ICrawler, Crawler>();
+            .AddScoped<ICrawler, Crawler>()
+            .AddScoped<ExecutionManager>();
         }
     }
 }

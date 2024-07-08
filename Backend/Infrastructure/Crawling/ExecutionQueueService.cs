@@ -31,7 +31,7 @@ namespace Infrastructure.Crawling
                 try
                 {
                     _logger.LogInformation("Checking for website records to execute at: {time}", DateTimeOffset.Now);
-                    
+
                     using (var scope = _serviceScopeFactory.CreateScope())
                     {
                         var websiteRecordRepository = scope.ServiceProvider.GetRequiredService<IWebsiteRecordRepository>();

@@ -23,10 +23,9 @@ namespace Infrastructure.Persistence.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid id)
+        public async Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid websiteRecordId)
         {
-            // TODO BACHA TOHLE DODELAT, ted se posila id exekuce, ne website recordu
-            return await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Url == url && x.OwnerId == id);
+            return await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Url == url && x.OwnerId == websiteRecordId);
         }
 
         public async Task UpdateAsync(CrawlNode node)

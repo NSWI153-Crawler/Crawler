@@ -10,7 +10,7 @@ namespace Domain.Interfaces.Repositories
     public interface ICrawlNodeRepository
     {
         Task AddAsync(CrawlNode crawlNode);
-        Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid id);
+        Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid websiteRecord);
         Task UpdateAsync(CrawlNode node);
     }
 }

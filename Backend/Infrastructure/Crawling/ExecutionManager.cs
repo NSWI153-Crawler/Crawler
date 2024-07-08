@@ -12,89 +12,89 @@ using Infrastructure.Crawling;
 
 namespace Infrastructure.Crawling;
 
- public class ExecutionManager
+public class ExecutionManager
+{
+    private readonly IWebsiteRecordRepository _websiteRecordRepository;
+    private readonly IExecutionRepository _executionRepository;
+    private readonly ICrawler _crawler;
+
+    public ExecutionManager(IWebsiteRecordRepository websiteRecordRepository, IExecutionRepository executionRepository, ICrawler crawler)
     {
-        private readonly IWebsiteRecordRepository _websiteRecordRepository;
-        private readonly IExecutionRepository _executionRepository;
-        private readonly ICrawler _crawler;
+        _websiteRecordRepository = websiteRecordRepository;
+        _executionRepository = executionRepository;
+        _crawler = crawler;
+    }
 
-        public ExecutionManager(IWebsiteRecordRepository websiteRecordRepository, IExecutionRepository executionRepository, ICrawler crawler)
+    public async Task StartExecutionAsync(Guid websiteRecordId)
+    {
+        var websiteRecord = await _websiteRecordRepository.GetByIdAsync(websiteRecordId);
+        if (websiteRecord == null)
         {
-            _websiteRecordRepository = websiteRecordRepository;
-            _executionRepository = executionRepository;
-            _crawler = crawler;
+            throw new ArgumentException("Invalid WebsiteRecord ID", nameof(websiteRecordId));
         }
 
-        public async Task StartExecutionAsync(Guid websiteRecordId)
+        if (websiteRecord.State != State.Active)
         {
-            var websiteRecord = await _websiteRecordRepository.GetByIdAsync(websiteRecordId);
-            if (websiteRecord == null)
+            throw new InvalidOperationException("Cannot start execution for inactive WebsiteRecord");
+        }
+
+        var execution = new Execution
+        {
+            Id = Guid.NewGuid(),
+            WebsiteRecordId = websiteRecordId,
+            StartTime = DateTime.UtcNow,
+            Status = ExecutionStatus.InProgress,
+            SitesCrawled = 0
+        };
+
+        await _executionRepository.CreateAsync(execution);
+
+        _ = Task.Run(async () =>
+        {
+            try
             {
-                throw new ArgumentException("Invalid WebsiteRecord ID", nameof(websiteRecordId));
+                await _crawler.CrawlAsync(websiteRecord, execution);
             }
-
-            if (websiteRecord.State != State.Active)
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Cannot start execution for inactive WebsiteRecord");
+                execution.Status = ExecutionStatus.Failure;
+                execution.EndTime = DateTime.UtcNow;
+                await _executionRepository.UpdateAsync(execution.Id, execution);
             }
+        });
+    }
 
-            var execution = new Execution
-            {
-                Id = Guid.NewGuid(),
-                WebsiteRecordId = websiteRecordId,
-                StartTime = DateTime.UtcNow,
-                Status = ExecutionStatus.InProgress,
-                SitesCrawled = 0
-            };
+    public async Task<IEnumerable<Execution?>> GetExecutionsForWebsiteRecordAsync(Guid websiteRecordId)
+    {
+        return await _executionRepository.GetAllExecutionsFromWebsiteRecord(websiteRecordId);
+    }
 
-            await _executionRepository.CreateAsync(execution);
-            
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await _crawler.CrawlAsync(websiteRecord, execution);
-                }
-                catch (Exception ex)
-                {
-                    execution.Status = ExecutionStatus.Failure;
-                    execution.EndTime = DateTime.UtcNow;
-                    await _executionRepository.UpdateAsync(execution.Id,execution);
-                }
-            });
-        }
+    public async Task<Execution?> GetExecutionByIdAsync(Guid executionId)
+    {
+        return await _executionRepository.GetByIdAsync(executionId);
+    }
 
-        public async Task<IEnumerable<Execution?>> GetExecutionsForWebsiteRecordAsync(Guid websiteRecordId)
-        {   
-            return await _executionRepository.GetAllExecutionsFromWebsiteRecord(websiteRecordId);
-        }
-
-        public async Task<Execution?> GetExecutionByIdAsync(Guid executionId)
+    public async Task SchedulePeriodicExecutionsAsync()
+    {
+        var activeRecords = await _websiteRecordRepository.GetActiveRecordsAsync();
+        foreach (var record in activeRecords)
         {
-            return await _executionRepository.GetByIdAsync(executionId);
-        }
-
-        public async Task SchedulePeriodicExecutionsAsync()
-        {
-            var activeRecords = await _websiteRecordRepository.GetActiveRecordsAsync();
-            foreach (var record in activeRecords)
+            var lastExecution = await _executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
+            if (lastExecution == null || ShouldStartNewExecution(lastExecution, record.Periodicity))
             {
-                var lastExecution = await _executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
-                if (lastExecution == null || ShouldStartNewExecution(lastExecution, record.Periodicity))
-                {
-                    await StartExecutionAsync(record.Id);
-                }
+                await StartExecutionAsync(record.Id);
             }
-        }
-
-        private bool ShouldStartNewExecution(Execution lastExecution, int periodicity)
-        {
-            var timeSinceLastExecution = DateTime.UtcNow - lastExecution.EndTime;
-            return timeSinceLastExecution.TotalMinutes >= periodicity;
-        }
-
-        public async Task<Execution?> GetLastExecutionFromWebsiteRecord(WebsiteRecord record)
-        {
-            return await _executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
         }
     }
+
+    private bool ShouldStartNewExecution(Execution lastExecution, int periodicity)
+    {
+        var timeSinceLastExecution = DateTime.UtcNow - lastExecution.EndTime;
+        return timeSinceLastExecution.TotalMinutes >= periodicity;
+    }
+
+    public async Task<Execution?> GetLastExecutionFromWebsiteRecord(WebsiteRecord record)
+    {
+        return await _executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
+    }
+}
