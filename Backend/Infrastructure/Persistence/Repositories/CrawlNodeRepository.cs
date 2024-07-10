@@ -2,6 +2,7 @@
 using Domain.Interfaces.Repositories;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,35 +13,55 @@ namespace Infrastructure.Persistence.Repositories
 {
     public class CrawlNodeRepository : ICrawlNodeRepository
     {
-        private readonly CrawlerDbContext dbContext;
-        public CrawlNodeRepository(CrawlerDbContext dbContext)
+        private readonly IServiceScopeFactory serviceScopeFactory;
+        public CrawlNodeRepository(IServiceScopeFactory serviceScopeFactory)
         {
-            this.dbContext = dbContext;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
+
         public async Task AddAsync(CrawlNode crawlNode)
         {
-            await dbContext.CrawlNodes.AddAsync(crawlNode);
-            await dbContext.SaveChangesAsync();
+
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<CrawlerDbContext>();
+                await dbContext.CrawlNodes.AddAsync(crawlNode);
+                await dbContext.SaveChangesAsync();
+
+            }
+
         }
 
         public async Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid websiteRecordId)
         {
-            return await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Url == url && x.OwnerId == websiteRecordId);
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<CrawlerDbContext>();
+
+                return await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Url == url && x.OwnerId == websiteRecordId);
+
+            }
         }
 
         public async Task UpdateAsync(CrawlNode node)
         {
-            var existingNode = await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Id == node.Id);
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<CrawlerDbContext>();
 
-            existingNode.Owner = node.Owner;
-            existingNode.OwnerId = node.OwnerId;
-            existingNode.CrawlNodes = node.CrawlNodes;
-            existingNode.Url = node.Url;
-            existingNode.ParentNode = node.ParentNode;
-            existingNode.ParentNodeId = node.ParentNodeId;
-            existingNode.CrawlTime = node.CrawlTime;
-            existingNode.Title = node.Title;
-            await dbContext.SaveChangesAsync();
+                var existingNode = await dbContext.CrawlNodes.FirstOrDefaultAsync(x => x.Id == node.Id);
+
+                existingNode.Owner = node.Owner;
+                existingNode.OwnerId = node.OwnerId;
+                existingNode.CrawlNodes = node.CrawlNodes;
+                existingNode.Url = node.Url;
+                existingNode.ParentNode = node.ParentNode;
+                existingNode.ParentNodeId = node.ParentNodeId;
+                existingNode.CrawlTime = node.CrawlTime;
+                existingNode.Title = node.Title;
+                await dbContext.SaveChangesAsync();
+            }
+
         }
     }
 }

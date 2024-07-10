@@ -30,8 +30,7 @@ DotNetEnv.Env.Load();
 builder.Services.AddInfrastructure(); // This method should register infrastructure services
 
 // Register other necessary services for ExecutionQueueService
-builder.Services.AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>();
-builder.Services.AddScoped<ExecutionManager>();
+builder.Services.AddSingleton<ExecutionManager>();
 // Register the ExecutionQueueService
 builder.Services.AddHostedService<ExecutionQueueService>();
 

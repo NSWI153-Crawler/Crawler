@@ -38,11 +38,10 @@ namespace Infrastructure
                     .LogTo(Console.WriteLine, LogLevel.Information)
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
-            ).AddScoped<IWebsiteRecordRepository, WebsiteRecordRepository>()
-            .AddScoped<IExecutionRepository, ExecutionRepository>()
-            .AddScoped<ICrawlNodeRepository, CrawlNodeRepository>()
-            .AddScoped<ICrawler, Crawler>()
-            .AddScoped<ExecutionManager>();
+            ).AddSingleton<IWebsiteRecordRepository, WebsiteRecordRepository>()
+            .AddSingleton<IExecutionRepository, ExecutionRepository>()
+            .AddSingleton<ICrawlNodeRepository, CrawlNodeRepository>()
+            .AddSingleton<ICrawler, Crawler>();
         }
     }
 }

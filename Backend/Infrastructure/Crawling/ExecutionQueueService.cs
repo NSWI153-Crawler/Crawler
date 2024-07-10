@@ -13,15 +13,16 @@ namespace Infrastructure.Crawling
 {
     public class ExecutionQueueService : BackgroundService
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<ExecutionQueueService> _logger;
-
+        private readonly IWebsiteRecordRepository websiteRecordRepository;
+        private readonly ExecutionManager executionManager;
         public ExecutionQueueService(
-            IServiceScopeFactory serviceScopeFactory,
+             IWebsiteRecordRepository websiteRecordRepository, ExecutionManager executionManager,
             ILogger<ExecutionQueueService> logger)
         {
-            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
+            this.websiteRecordRepository = websiteRecordRepository;
+            this.executionManager = executionManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,28 +33,23 @@ namespace Infrastructure.Crawling
                 {
                     _logger.LogInformation("Checking for website records to execute at: {time}", DateTimeOffset.Now);
 
-                    using (var scope = _serviceScopeFactory.CreateScope())
+                    var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
+                    foreach (var record in activeRecords)
                     {
-                        var websiteRecordRepository = scope.ServiceProvider.GetRequiredService<IWebsiteRecordRepository>();
-                        var executionManager = scope.ServiceProvider.GetRequiredService<ExecutionManager>();
-
-                        var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
-                        foreach (var record in activeRecords)
+                        if (await ShouldExecuteAsync(record, executionManager))
                         {
-                            if (await ShouldExecuteAsync(record, executionManager))
+                            try
                             {
-                                try
-                                {
-                                    await executionManager.StartExecutionAsync(record.Id);
-                                    _logger.LogInformation("Started execution for website record: {recordId}", record.Id);
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Error starting execution for website record: {recordId}", record.Id);
-                                }
+                                await executionManager.StartExecutionAsync(record.Id);
+                                _logger.LogInformation("Started execution for website record: {recordId}", record.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error starting execution for website record: {recordId}", record.Id);
                             }
                         }
                     }
+                    
 
                     // Delay for a minute before the next check
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
