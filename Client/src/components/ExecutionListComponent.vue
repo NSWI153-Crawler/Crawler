@@ -8,36 +8,14 @@ defineComponent({
 
 const isExpanded = ref(false)
 const store = useExecutionStore()
-
-const executions = computed(() => store.executions)
-
-onMounted(() => {
-  store.fetchExecutions()
-  store.periodicalFetchExecutions()
-  document.addEventListener('click', onClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', onClickOutside)
-  store.stopPeriodicalFetchExecutions()
-})
-
 const currentPage = ref(1)
 const pageSize = ref(11)
-const sortColumn = ref('time')
+const executions = computed(() => store.executions)
+const sortColumn = ref('executionTime')
 const sortOrder = ref('desc')
-
-const uniqueExecutions = computed(() => {
-  // used for filtering
-  const uniqueLabels = new Set()
-  return executions.value.filter((execution) => {
-    if (!uniqueLabels.has(execution.recordLabel)) {
-      uniqueLabels.add(execution.recordLabel)
-      return true
-    }
-    return false
-  })
-})
+const uniqueLabels = computed(() => store.getUniqueLabels)
+const filteredLabelsSet = ref(new Set<string>())
+const filterBoxExpanded = ref(false)
 
 const sortedExecutions = computed(() => {
   if (!sortColumn.value) return executions.value
@@ -51,13 +29,9 @@ const sortedExecutions = computed(() => {
 })
 
 const filteredExecutions = computed(() => {
-  const checkedLabels = new Set()
-  uniqueExecutions.value.forEach((execution) => {
-    if (execution.checked) {
-      checkedLabels.add(execution.recordLabel)
-    }
-  })
-  return sortedExecutions.value.filter((execution) => checkedLabels.has(execution.recordLabel))
+  return sortedExecutions.value.filter((execution) =>
+    filteredLabelsSet.value.has(execution.recordLabel)
+  )
 })
 
 const paginatedExecutions = computed(() => {
@@ -65,6 +39,18 @@ const paginatedExecutions = computed(() => {
   const end = start + pageSize.value
   return filteredExecutions.value.slice(start, end)
 })
+
+const formatDate = (dateString: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit'
+  }
+  return dateString.toLocaleString('cs-CZ', options)
+}
 
 const sortTable = (column: string) => {
   if (sortColumn.value === column) sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
@@ -74,24 +60,27 @@ const sortTable = (column: string) => {
   }
 }
 
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit'
+const handleCheckboxChange = (event: Event, label: string) => {
+  const target = event.target as HTMLInputElement
+  if (target.checked) {
+    filteredLabelsSet.value.add(label)
+  } else {
+    filteredLabelsSet.value.delete(label)
   }
-  return new Date(dateString).toLocaleString('cs-CZ', options)
 }
 
-const allChecked = computed({
-  get: () => executions.value.every((execution) => execution.checked),
-  set: (newValue) => executions.value.forEach((execution) => (execution.checked = newValue))
+const checkAllCheckboxes = computed({
+  get: () => uniqueLabels.value.length === filteredLabelsSet.value.size,
+  set: (newValue) => {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]')
+    if (newValue) {
+      uniqueLabels.value.forEach((label) => filteredLabelsSet.value.add(label))
+    } else {
+      filteredLabelsSet.value.clear()
+    }
+    checkboxes.forEach((checkbox) => ((checkbox as HTMLInputElement).checked = newValue))
+  }
 })
-
-const filterBoxExpanded = ref(false)
 
 const showCheckboxes = () => {
   const checkboxes = document.getElementById('checkboxes')
@@ -124,6 +113,16 @@ watch(filteredExecutions, () => {
   if (currentPage.value > totalPages) currentPage.value = totalPages
   if (currentPage.value === 0) currentPage.value = 1
 })
+
+onMounted(() => {
+  store.periodicalFetchExecutions()
+  document.addEventListener('click', onClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onClickOutside)
+  store.stopPeriodicalFetchExecutions()
+})
 </script>
 
 <template>
@@ -150,20 +149,20 @@ watch(filteredExecutions, () => {
           class="hidden absolute bg-white z-10 border-2 border-dark-bg w-64 overflow-auto rounded shadow max-h-60"
         >
           <label for="all" class="block cursor-pointer select-none hover:bg-[#1e90ff]">
-            <input class="ml-2" type="checkbox" id="all" v-model="allChecked" /> Select all
+            <input class="ml-2" type="checkbox" id="all" v-model="checkAllCheckboxes" /> Select all
           </label>
-          <span v-for="execution in uniqueExecutions" :key="execution.id">
+          <span v-for="(label, index) in uniqueLabels" :key="index">
             <label
               class="block cursor-pointer select-none hover:bg-[#1e90ff]"
-              :for="`execution-${execution.id}`"
+              :for="`label-${index}`"
             >
               <input
                 class="ml-2"
                 type="checkbox"
-                :id="`execution-${execution.id}`"
-                v-model="execution.checked"
+                :id="`label-${index}`"
+                @change="handleCheckboxChange($event, label)"
               />
-              {{ execution.recordLabel }}
+              {{ label }}
             </label>
           </span>
         </div>
@@ -173,13 +172,41 @@ watch(filteredExecutions, () => {
         <table class="table-auto w-full dark:text-dark-fg">
           <thead class="text-left">
             <tr>
-              <th class="px-2 button-style">Label</th>
+              <th class="px-2 button-style" @click="sortTable('recordLabel')">
+                Label
+                <span v-if="sortColumn === 'recordLabel'">
+                  <span v-if="sortOrder === 'asc'">↑</span>
+                  <span v-else>↓</span>
+                </span>
+                <span v-else>→</span>
+              </th>
 
-              <th class="px-2 button-style">Time</th>
+              <th class="px-2 button-style" @click="sortTable('executionTime')">
+                Time
+                <span v-if="sortColumn === 'executionTime'">
+                  <span v-if="sortOrder === 'asc'">↑</span>
+                  <span v-else>↓</span>
+                </span>
+                <span v-else>→</span>
+              </th>
 
-              <th class="px-2 button-style">Sites Crawled</th>
+              <th class="px-2 button-style" @click="sortTable('sitesCrawled')">
+                Sites Crawled
+                <span v-if="sortColumn === 'sitesCrawled'">
+                  <span v-if="sortOrder === 'asc'">↑</span>
+                  <span v-else>↓</span>
+                </span>
+                <span v-else>→</span>
+              </th>
 
-              <th class="px-2 button-style">Status</th>
+              <th class="px-2 button-style" @click="sortTable('executionStatus')">
+                Status
+                <span v-if="sortColumn === 'executionStatus'">
+                  <span v-if="sortOrder === 'asc'">↑</span>
+                  <span v-else>↓</span>
+                </span>
+                <span v-else>→</span>
+              </th>
             </tr>
           </thead>
 

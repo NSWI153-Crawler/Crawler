@@ -9,7 +9,7 @@ export interface WebsiteRecord {
   label: string
   isActive: boolean
   tags: string[]
-  lastExecutionTime?: string | null
+  lastExecutionTime?: Date | null
   lastExecutionStatus?: string | null
   addedToGraph?: boolean
 }
@@ -23,7 +23,7 @@ function transformWebsiteRecordFromData(data: any): WebsiteRecord {
     label: data.label,
     isActive: data.state === 0,
     tags: data['tags'].map((tag: any) => tag.name),
-    lastExecutionTime: data.lastExecution?.startTime,
+    lastExecutionTime: new Date(data.lastExecution?.startTime),
     lastExecutionStatus:
       data.lastExecution?.status === 0
         ? 'Success'
@@ -144,11 +144,7 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
     })
   }
 
-  const changeExecutionTimeStatus = (
-    id: string,
-    executionTime: string,
-    executionStatus: string
-  ) => {
+  const changeExecutionTimeStatus = (id: string, executionTime: Date, executionStatus: string) => {
     const index = records.value.findIndex((record) => record.id === id)
     if (index !== -1) {
       records.value[index].lastExecutionTime = executionTime

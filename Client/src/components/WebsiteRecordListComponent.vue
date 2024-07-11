@@ -40,7 +40,7 @@ function sortRecords() {
       return a.periodicity - b.periodicity
     } else if (sort.value === 'lastCrawled') {
       if (!a.lastExecutionTime || !b.lastExecutionTime) return 0
-      return a.lastExecutionTime.localeCompare(b.lastExecutionTime)
+      return new Date(b.lastExecutionTime).getTime() - new Date(a.lastExecutionTime).getTime()
     }
     return 0
   })
@@ -62,7 +62,7 @@ const paginatedRecords = computed(() => {
   return filteredRecords.value.slice(start, end)
 })
 
-const formatDate = (dateString: string | null | undefined) => {
+const formatDate = (dateString: Date | null | undefined) => {
   if (!dateString) return ''
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -72,7 +72,7 @@ const formatDate = (dateString: string | null | undefined) => {
     minute: '2-digit',
     second: '2-digit'
   }
-  return new Date(dateString).toLocaleString('cs-CZ', options)
+  return dateString.toLocaleString('cs-CZ', options)
 }
 
 watch(() => sort.value, sortRecords)
