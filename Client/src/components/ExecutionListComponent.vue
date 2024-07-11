@@ -102,10 +102,12 @@ const hideCheckboxes = () => {
 }
 
 const onClickOutside = (event: MouseEvent) => {
+  const executionList = document.getElementById('execution-list')
   const checkboxes = document.getElementById('checkboxes')
   const dropdown = document.getElementById('dropdown')
   if (dropdown && dropdown.contains(event.target as Node)) return
   if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
+  if (executionList && !executionList.contains(event.target as Node)) isExpanded.value = false
 }
 
 watch(filteredExecutions, () => {
@@ -126,7 +128,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-dark-bg">
+  <div class="bg-white dark:bg-dark-bg" id="execution-list">
     <div class="w-component-xl select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"

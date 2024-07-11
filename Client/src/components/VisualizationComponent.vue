@@ -172,8 +172,12 @@ function adjustTooltipPosition() {
 
 const checkIfClickedOutside = (event: MouseEvent) => {
   // Hides tooltip if clicked outside
+  const visualizationDiv = document.getElementById('visualization-div')
   if (!tooltip.value || !tooltip.value.contains(event.target as HTMLElement)) {
     tooltipOpacity.value = 0
+  }
+  if (visualizationDiv && !visualizationDiv.contains(event.target as HTMLElement)) {
+    isExpanded.value = false
   }
 }
 
@@ -354,7 +358,7 @@ watch(
 </script>
 
 <template>
-  <div class="bg-white dark:bg-dark-bg">
+  <div class="bg-white dark:bg-dark-bg" id="visualization-div">
     <div class="w-component-xl select-none cursor-pointer" @click="isExpanded = !isExpanded">
       <button
         class="absolute right-8 mt-[9px] bg-[url('/arrow_down.png')] bg-cover bg-center bg-no-repeat h-4 w-8 dark:invert"
