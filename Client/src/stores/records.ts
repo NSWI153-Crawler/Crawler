@@ -22,7 +22,7 @@ function transformWebsiteRecordFromData(data: any): WebsiteRecord {
     periodicity: data.periodicity,
     label: data.label,
     isActive: data.state === 0,
-    tags: data['tags'].map((tag: any) => tag.name),
+    tags: data['tags'].map((tag: any) => tag.name).filter((name: string) => name),
     lastExecutionTime: new Date(data.lastExecution?.startTime),
     lastExecutionStatus:
       data.lastExecution?.status === 0
@@ -43,7 +43,7 @@ function transformWebsiteRecordToData(record: WebsiteRecord): any {
     periodicity: record.periodicity,
     label: record.label,
     state: record.isActive ? 0 : 1,
-    tags: record.tags.map((name) => ({ name }))
+    tags: record.tags.filter((name: string) => name).map((name) => ({ name }))
   }
 }
 

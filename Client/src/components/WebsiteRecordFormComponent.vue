@@ -39,7 +39,7 @@ async function handleSubmit() {
       formFields.periodicity,
       formFields.label,
       formFields.status,
-      formFields.tags.split(/[,\s]+/)
+      formFields.tags.trim().split(/[,\s]+/)
     )
   } else {
     await store.updateRecord(
@@ -49,7 +49,7 @@ async function handleSubmit() {
       formFields.periodicity,
       formFields.label,
       formFields.status,
-      formFields.tags.split(/[,\s]+/)
+      formFields.tags.trim().split(/[,\s]+/)
     )
   }
   hideForm()

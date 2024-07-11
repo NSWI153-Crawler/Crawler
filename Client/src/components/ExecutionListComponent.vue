@@ -10,9 +10,7 @@ const isExpanded = ref(false)
 const store = useExecutionStore()
 const currentPage = ref(1)
 const pageSize = ref(11)
-
 const executions = computed(() => store.executions)
-
 const sortColumn = ref('executionTime')
 const sortOrder = ref('desc')
 const uniqueLabels = computed(() => store.getUniqueLabels)

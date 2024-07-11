@@ -219,7 +219,7 @@ onMounted(() => {
             <strong>RegExp:</strong> {{ record.regexp }}
           </p>
           <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
-            <strong>Tags:</strong> {{ record.tags.join(', ') }}
+            <strong>Tags:</strong> {{ record.tags.join(', ') ?? "" }}
           </p>
           <p class="text-gray-700 dark:bg-dark-bg dark:text-dark-fg">
             <strong>Periodicity: </strong>Every {{ record.periodicity }} minutes
