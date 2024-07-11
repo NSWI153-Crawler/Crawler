@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { WebsiteRecord } from './records'
 import { useWebsiteRecordStore } from '@/stores/records'
@@ -39,10 +39,9 @@ export const useExecutionStore = defineStore('execution', () => {
   const fetchExecutions = async () => {
     const response = await fetch(`${serverUrl}/api/Execution`)
     const data = await response.json()
-    const newExecutions: Array<Execution> = data.map((execution: any) => {
+    executions.value = data.map((execution: any) => {
       return transformExecutionFromData(execution)
     })
-    executions.value = newExecutions
   }
 
   let continueFetching: boolean

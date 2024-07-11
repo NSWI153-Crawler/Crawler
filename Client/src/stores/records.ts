@@ -57,10 +57,9 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
   const fetchRecords = async () => {
     const response = await fetch(`${serverUrl}/api/WebsiteRecord`)
     const data = await response.json()
-    const newRecords: Array<WebsiteRecord> = data.map((record: any) =>
+    records.value = data.map((record: any) =>
       transformWebsiteRecordFromData(record)
     )
-    records.value = newRecords
   }
 
   const createRecord = async (

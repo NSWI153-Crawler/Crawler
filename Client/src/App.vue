@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import HomeView from '@/views/HomeView.vue'
-
 import { gql } from 'graphql-tag'
 import { useClient } from 'villus'
 
