@@ -110,7 +110,7 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
       isActive,
       tags
     })
-    console.log(JSON.stringify(updatedRecord))
+
     await fetch(`${serverUrl}/api/WebsiteRecord/${id}`, {
       method: 'PUT',
       headers: {
@@ -151,6 +151,11 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
     }
   }
 
+  // Getters
+  const getLabels = () => {
+    return records.value.map((record) => record.label)
+  }
+
   return {
     fetchRecords,
     createRecord,
@@ -158,6 +163,7 @@ export const useWebsiteRecordStore = defineStore('websiteRecord', () => {
     deleteRecord,
     runExecution,
     changeExecutionTimeStatus,
+    getLabels,
     records
   }
 })

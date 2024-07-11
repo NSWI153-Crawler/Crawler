@@ -21,9 +21,9 @@ function transformExecutionFromData(data: any) {
     recordLabel: data.websiteRecord.label,
     executionTime: new Date(data.startTime),
     executionStatus:
-      data.executionStatus === 0
+      data.status === 0
         ? 'Success'
-        : data.executionStatus === 1
+        : data.status === 1
           ? 'Failure'
           : 'In Progress',
     sitesCrawled: data.sitesCrawled
@@ -76,11 +76,7 @@ export const useExecutionStore = defineStore('execution', () => {
   const getExecutions = computed(() => executions.value)
 
   const getUniqueLabels = computed(() => {
-    const labels = new Set<string>()
-    for (const execution of executions.value) {
-      labels.add(execution.recordLabel)
-    }
-    return Array.from(labels)
+    return websiteRecordStore.getLabels()
   })
 
   return {
