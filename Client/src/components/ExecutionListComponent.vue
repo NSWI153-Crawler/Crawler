@@ -61,24 +61,25 @@ const sortTable = (column: string) => {
 }
 
 const handleCheckboxChange = (event: Event, label: string) => {
-  const target = event.target as HTMLInputElement
-  if (target.checked) {
+  if ((event.target as HTMLInputElement).checked) {
     filteredLabelsSet.value.add(label)
   } else {
     filteredLabelsSet.value.delete(label)
   }
 }
 
+const handleSelectAll = (event: Event) => {
+  checkAllCheckboxes.value = (event.target as HTMLInputElement).checked
+}
+
 const checkAllCheckboxes = computed({
   get: () => uniqueLabels.value.length === filteredLabelsSet.value.size,
   set: (newValue) => {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]')
     if (newValue) {
       uniqueLabels.value.forEach((label) => filteredLabelsSet.value.add(label))
     } else {
       filteredLabelsSet.value.clear()
     }
-    checkboxes.forEach((checkbox) => ((checkbox as HTMLInputElement).checked = newValue))
   }
 })
 
@@ -109,6 +110,18 @@ const onClickOutside = (event: MouseEvent) => {
   if (checkboxes && !checkboxes.contains(event.target as Node)) hideCheckboxes()
   if (executionList && !executionList.contains(event.target as Node)) isExpanded.value = false
 }
+
+let flag = false
+watch(
+  () => store.getUniqueLabels,
+  (newLabels) => {
+    if (newLabels.length > 0 && !flag) {
+      checkAllCheckboxes.value = true
+      flag = true;
+    }
+  },
+  { immediate: true }
+);
 
 watch(filteredExecutions, () => {
   const totalPages = Math.ceil(filteredExecutions.value.length / pageSize.value)
@@ -151,7 +164,7 @@ onUnmounted(() => {
           class="hidden absolute bg-white z-10 border-2 border-dark-bg w-64 overflow-auto rounded shadow max-h-60"
         >
           <label for="all" class="block cursor-pointer select-none hover:bg-[#1e90ff]">
-            <input class="ml-2" type="checkbox" id="all" v-model="checkAllCheckboxes" /> Select all
+            <input class="ml-2" type="checkbox" id="all" v-model="checkAllCheckboxes" @change="handleSelectAll" /> Select all
           </label>
           <span v-for="(label, index) in uniqueLabels" :key="index">
             <label
@@ -163,6 +176,7 @@ onUnmounted(() => {
                 type="checkbox"
                 :id="`label-${index}`"
                 @change="handleCheckboxChange($event, label)"
+                :checked="filteredLabelsSet.has(label)"
               />
               {{ label }}
             </label>
