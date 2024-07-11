@@ -10,7 +10,9 @@ const isExpanded = ref(false)
 const store = useExecutionStore()
 const currentPage = ref(1)
 const pageSize = ref(11)
+
 const executions = computed(() => store.executions)
+
 const sortColumn = ref('executionTime')
 const sortOrder = ref('desc')
 const uniqueLabels = computed(() => store.getUniqueLabels)
@@ -170,7 +172,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="w-component-xl h-[500px]">
+      <div class="w-component-xl min-h-[500px]">
         <table class="table-auto w-full dark:text-dark-fg">
           <thead class="text-left">
             <tr>
