@@ -21,6 +21,7 @@
     "graphql-tag": "^2.12.6",
     "pinia": "^2.1.7",
     "v-network-graph": "^0.9.15",
+    "villus": "^3.5.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },

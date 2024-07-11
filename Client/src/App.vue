@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import HomeView from '@/views/HomeView.vue'
+
+import { gql } from 'graphql-tag'
+import { useClient } from 'villus'
+
+useClient({
+  url: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:8080/graphql'
+})
 
 const isDarkMode = ref(false)
 function toggleDarkMode(darkMode: boolean) {

@@ -9,16 +9,18 @@ import {
   onUnmounted,
   reactive,
   ref,
-  defineComponent
+  defineComponent,
 } from 'vue'
 import { useWebsiteRecordStore } from '@/stores/records'
 import dagre from '@dagrejs/dagre'
 import WebsiteRecordFormComponent from '@/components/WebsiteRecordFormComponent.vue'
+import { useQuery } from 'villus'
+
+const store = useWebsiteRecordStore()
 
 const isExpanded = ref(false)
 const formComponent: any = ref(null)
 const graph = ref<vNG.VNetworkGraphInstance>()
-const store = useWebsiteRecordStore()
 
 defineComponent({
   name: 'VisualizationComponent'
@@ -44,7 +46,6 @@ interface Edge extends vNG.Edge {
 type EdgePlaceHolder = [string, string]
 
 const nodes: Record<string, Node> = reactive({
-  // TODO: replace with real data
   node1: {
     name: 'example.com',
     crawled: true,
@@ -66,7 +67,7 @@ const nodes: Record<string, Node> = reactive({
         label: 'Example Record',
         isActive: true,
         tags: ['tag1', 'tag2'],
-        lastExecutionTime: '2021-10-02T13:00:00Z',
+        lastExecutionTime: new Date('2021-10-02T13:00:00Z'),
         lastExecutionStatus: 'Success'
       },
       {
@@ -77,7 +78,7 @@ const nodes: Record<string, Node> = reactive({
         label: 'Example Record 2',
         isActive: false,
         tags: ['tag3', 'tag4'],
-        lastExecutionTime: '2021-10-02T14:00:00Z',
+        lastExecutionTime: new Date('2021-10-02T13:00:00Z'),
         lastExecutionStatus: 'Failure'
       }
     ]
@@ -208,7 +209,6 @@ function toggleMode(mode: 'static' | 'live') {
   if (mode === modeToggle.value) return
   modeToggle.value = mode
   if (mode === modeLive) {
-    //TODO
     console.log('Live mode')
   }
 }
