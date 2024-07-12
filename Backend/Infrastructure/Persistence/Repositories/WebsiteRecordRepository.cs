@@ -76,7 +76,7 @@ namespace Infrastructure.Persistence.Repositories
             using (var scope = serviceScopeFactory.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<CrawlerDbContext>();
-                return await dbContext.WebsiteRecords.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
+                return await dbContext.WebsiteRecords.Include(x => x.Tags).Include(y => y.CrawlNodes).FirstOrDefaultAsync(x => x.Id == id);
 
             }
         }
