@@ -29,7 +29,7 @@ namespace Infrastructure.Crawling
             {
                 try
                 {
-                   tawait ScheduleExecutionsAsync();
+                    await ScheduleExecutionsAsync();
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Check every minute
                 }
                 catch (Exception ex)
