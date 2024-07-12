@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CrawlerDbContext))]
-    [Migration("20240519215931_added executions")]
-    partial class addedexecutions
+    [Migration("20240712114800_Initial migration")]
+    partial class Initialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,38 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.Entities.CrawlNode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CrawlTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("ParentNodeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("ParentNodeId");
+
+                    b.ToTable("CrawlNodes");
+                });
 
             modelBuilder.Entity("Domain.Entities.Execution", b =>
                 {
@@ -40,7 +72,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid?>("WebsiteRecordId")
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("WebsiteRecordId")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
@@ -99,11 +134,32 @@ namespace Infrastructure.Migrations
                     b.ToTable("WebsiteRecords");
                 });
 
+            modelBuilder.Entity("Domain.Entities.CrawlNode", b =>
+                {
+                    b.HasOne("Domain.Entities.WebsiteRecord", "Owner")
+                        .WithMany("CrawlNodes")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.CrawlNode", "ParentNode")
+                        .WithMany("CrawlNodes")
+                        .HasForeignKey("ParentNodeId");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("ParentNode");
+                });
+
             modelBuilder.Entity("Domain.Entities.Execution", b =>
                 {
-                    b.HasOne("Domain.Entities.WebsiteRecord", null)
+                    b.HasOne("Domain.Entities.WebsiteRecord", "WebsiteRecord")
                         .WithMany("Executions")
-                        .HasForeignKey("WebsiteRecordId");
+                        .HasForeignKey("WebsiteRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebsiteRecord");
                 });
 
             modelBuilder.Entity("Domain.Entities.Tag", b =>
@@ -117,8 +173,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("WebsiteRecord");
                 });
 
+            modelBuilder.Entity("Domain.Entities.CrawlNode", b =>
+                {
+                    b.Navigation("CrawlNodes");
+                });
+
             modelBuilder.Entity("Domain.Entities.WebsiteRecord", b =>
                 {
+                    b.Navigation("CrawlNodes");
+
                     b.Navigation("Executions");
 
                     b.Navigation("Tags");

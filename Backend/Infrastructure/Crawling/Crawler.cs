@@ -37,7 +37,7 @@ namespace Infrastructure.Crawling
             {
                 execution.Status = ExecutionStatus.InProgress;
                 await _executionRepository.UpdateAsync(execution.Id, execution);
-
+                await _crawlNodeRepository.DeleteForWebsiteRecordAsync(record.Id);
                 var crawledUrls = new HashSet<string>();
                 var urlsToCrawl = new Queue<(string Url, Guid? ParentId)>();
                 urlsToCrawl.Enqueue((record.Url, null));

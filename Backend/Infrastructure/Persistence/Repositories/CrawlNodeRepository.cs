@@ -118,6 +118,8 @@ namespace Infrastructure.Persistence.Repositories
                             }
 
                             await dbContext.CrawlNodes.AddAsync(node);
+                            await dbContext.SaveChangesAsync();
+
                         }
                         else
                         {
@@ -134,6 +136,20 @@ namespace Infrastructure.Persistence.Repositories
                     _logger.LogError(ex, "Error adding range of CrawlNodes");
                     throw;
                 }
+            }
+        }
+
+        public async Task DeleteForWebsiteRecordAsync(Guid websiteRecordId)
+        {
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<CrawlerDbContext>();
+                var existingNodes = await dbContext.CrawlNodes.Where(x => x.OwnerId == websiteRecordId).ToListAsync();
+                foreach(var existingNode in existingNodes)
+                {
+                    dbContext.CrawlNodes.Remove(existingNode);
+                }
+                await dbContext.SaveChangesAsync();
             }
         }
     }

@@ -13,5 +13,6 @@ namespace Domain.Interfaces.Repositories
         Task AddRangeAsync(IEnumerable<CrawlNode> crawlNodes);
         Task<CrawlNode?> GetByUrlAndExecutionIdAsync(string url, Guid websiteRecordId);
         Task UpdateAsync(CrawlNode node);
+        Task DeleteForWebsiteRecordAsync(Guid websiteRecordId);
     }
 }

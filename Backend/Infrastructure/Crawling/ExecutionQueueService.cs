@@ -29,7 +29,7 @@ namespace Infrastructure.Crawling
             {
                 try
                 {
-                    await ScheduleExecutionsAsync();
+                   tawait ScheduleExecutionsAsync();
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Check every minute
                 }
                 catch (Exception ex)
@@ -47,14 +47,15 @@ namespace Infrastructure.Crawling
             var crawler = scope.ServiceProvider.GetRequiredService<ICrawler>();
 
             var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
-            foreach (var record in activeRecords)
+            var tasks = activeRecords.Select(async record =>
             {
                 var lastExecution = await executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
                 if (lastExecution == null || ShouldStartNewExecution(lastExecution, record.Periodicity))
                 {
                     await StartExecutionAsync(record, executionRepository, crawler);
                 }
-            }
+            });
+            await Task.WhenAll(tasks);
         }
 
         private bool ShouldStartNewExecution(Execution lastExecution, int periodicity)
