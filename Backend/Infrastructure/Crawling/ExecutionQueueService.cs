@@ -1,28 +1,26 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Interfaces.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+
 namespace Infrastructure.Crawling
 {
     public class ExecutionQueueService : BackgroundService
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ExecutionQueueService> _logger;
-        private readonly IWebsiteRecordRepository websiteRecordRepository;
-        private readonly ExecutionManager executionManager;
+
         public ExecutionQueueService(
-             IWebsiteRecordRepository websiteRecordRepository, ExecutionManager executionManager,
+            IServiceProvider serviceProvider,
             ILogger<ExecutionQueueService> logger)
         {
+            _serviceProvider = serviceProvider;
             _logger = logger;
-            this.websiteRecordRepository = websiteRecordRepository;
-            this.executionManager = executionManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,54 +29,66 @@ namespace Infrastructure.Crawling
             {
                 try
                 {
-                    _logger.LogInformation("Checking for website records to execute at: {time}", DateTimeOffset.Now);
-
-                    var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
-                    foreach (var record in activeRecords)
-                    {
-                        if (await ShouldExecuteAsync(record, executionManager))
-                        {
-                            try
-                            {
-                                await executionManager.StartExecutionAsync(record.Id);
-                                _logger.LogInformation("Started execution for website record: {recordId}", record.Id);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error starting execution for website record: {recordId}", record.Id);
-                            }
-                        }
-                    }
-                    
-
-                    // Delay for a minute before the next check
-                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                    await ScheduleExecutionsAsync();
+                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Check every minute
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred in the ExecutionQueueService");
-                    // Delay for a short period before retrying in case of an error
-                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    _logger.LogError(ex, "An error occurred while scheduling executions");
                 }
             }
         }
 
-        private async Task<bool> ShouldExecuteAsync(WebsiteRecord record, ExecutionManager executionManager)
+        private async Task ScheduleExecutionsAsync()
         {
-            if (record.State != State.Active)
-            {
-                return false;
-            }
+            using var scope = _serviceProvider.CreateScope();
+            var websiteRecordRepository = scope.ServiceProvider.GetRequiredService<IWebsiteRecordRepository>();
+            var executionRepository = scope.ServiceProvider.GetRequiredService<IExecutionRepository>();
+            var crawler = scope.ServiceProvider.GetRequiredService<ICrawler>();
 
-            var lastExecution = await executionManager.GetLastExecutionFromWebsiteRecord(record);
-            if (lastExecution == null)
+            var activeRecords = await websiteRecordRepository.GetActiveRecordsAsync();
+            foreach (var record in activeRecords)
             {
-                return true; // No previous execution, should execute
+                var lastExecution = await executionRepository.GetLastExecutionFromWebsiteRecord(record.Id);
+                if (lastExecution == null || ShouldStartNewExecution(lastExecution, record.Periodicity))
+                {
+                    await StartExecutionAsync(record, executionRepository, crawler);
+                }
             }
+        }
 
-            var timeSinceLastExecution = DateTime.UtcNow - lastExecution.EndTime;
-            return timeSinceLastExecution.TotalMinutes >= record.Periodicity;
+        private bool ShouldStartNewExecution(Execution lastExecution, int periodicity)
+        {
+            var timeSinceLastExecution = DateTime.UtcNow - lastExecution.EndTime ;
+            return timeSinceLastExecution.TotalMinutes >= periodicity;
+        }
+
+        private async Task StartExecutionAsync(WebsiteRecord record, IExecutionRepository executionRepository, ICrawler crawler)
+        {
+            var execution = new Execution
+            {
+                Id = Guid.NewGuid(),
+                WebsiteRecordId = record.Id,
+                StartTime = DateTime.UtcNow,
+                Status = ExecutionStatus.InProgress
+            };
+
+            await executionRepository.CreateAsync(execution);
+            await crawler.CrawlAsync(record, execution);
+        }
+
+        public async Task ManualStartExecutionAsync(Guid websiteRecordId)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var websiteRecordRepository = scope.ServiceProvider.GetRequiredService<IWebsiteRecordRepository>();
+            var executionRepository = scope.ServiceProvider.GetRequiredService<IExecutionRepository>();
+            var crawler = scope.ServiceProvider.GetRequiredService<ICrawler>();
+
+            var record = await websiteRecordRepository.GetByIdAsync(websiteRecordId);
+            if (record != null)
+            {
+                await StartExecutionAsync(record, executionRepository, crawler);
+            }
         }
     }
 }
-

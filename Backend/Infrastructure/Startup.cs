@@ -31,17 +31,18 @@ namespace Infrastructure
             var connectionString = $"server={host};user={user};database={database};password={password};";
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
             return services.AddDbContext<CrawlerDbContext>(
-                dbContextOptions => dbContextOptions
-                    .UseMySql(connectionString, serverVersion)
-                    // The following three options help with debugging, but should
-                    // be changed or removed for production.
-                    .LogTo(Console.WriteLine, LogLevel.Information)
-                    .EnableSensitiveDataLogging()
-                    .EnableDetailedErrors()
-            ).AddSingleton<IWebsiteRecordRepository, WebsiteRecordRepository>()
-            .AddSingleton<IExecutionRepository, ExecutionRepository>()
-            .AddSingleton<ICrawlNodeRepository, CrawlNodeRepository>()
-            .AddSingleton<ICrawler, Crawler>();
+                    dbContextOptions => dbContextOptions
+                        .UseMySql(connectionString, serverVersion)
+                        // The following three options help with debugging, but should
+                        // be changed or removed for production.
+                        .LogTo(Console.WriteLine, LogLevel.Information)
+                        .EnableSensitiveDataLogging()
+                        .EnableDetailedErrors()
+                ).AddSingleton<IWebsiteRecordRepository, WebsiteRecordRepository>()
+                .AddSingleton<IExecutionRepository, ExecutionRepository>()
+                .AddSingleton<ICrawlNodeRepository, CrawlNodeRepository>()
+                .AddSingleton<ICrawler, Crawler>();
+
         }
     }
 }

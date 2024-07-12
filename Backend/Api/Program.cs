@@ -29,8 +29,7 @@ DotNetEnv.Env.Load();
 
 builder.Services.AddInfrastructure(); // This method should register infrastructure services
 
-// Register other necessary services for ExecutionQueueService
-builder.Services.AddSingleton<ExecutionManager>();
+builder.Services.AddHttpClient();
 // Register the ExecutionQueueService
 builder.Services.AddHostedService<ExecutionQueueService>();
 

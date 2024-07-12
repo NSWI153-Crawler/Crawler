@@ -16,7 +16,7 @@ namespace Domain.Entities
         public Guid OwnerId { get; set; }
         public WebsiteRecord Owner { get; set; }
         // parent
-        public Guid ParentNodeId { get; set; }
+        public Guid? ParentNodeId { get; set; }
         public CrawlNode ParentNode { get; set; }
         // children
         public List<CrawlNode> CrawlNodes { get; set; }
