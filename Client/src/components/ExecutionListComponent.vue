@@ -239,11 +239,11 @@ onUnmounted(() => {
               </td>
               <td
                 class="border border-dark-bg px-2 py-2 text-center text-dark-bg dark:border-dark-fg"
-                :class="
-                  execution.executionStatus === 'success'
-                    ? 'bg-green-400 dark:bg-[#14e414]'
-                    : 'bg-[#ff0000] dark:bg-[#900] dark:text-dark-fg dark:font-bold'
-                "
+                :class="{
+                    'bg-green-400 dark:bg-[#14e414]': execution.executionStatus === 'Success',
+                    'bg-yellow-400 dark:bg-[#ff0]': execution.executionStatus === 'In Progress',
+                    'bg-[#ff0000] dark:bg-[#900] dark:text-dark-fg dark:font-bold': execution.executionStatus !== 'Success' && execution.executionStatus !== 'In Progress'
+                }"
               >
                 {{ execution.executionStatus }}
               </td>
